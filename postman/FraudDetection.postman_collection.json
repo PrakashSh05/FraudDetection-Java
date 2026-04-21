@@ -1,0 +1,261 @@
+{
+  "info": {
+    "_postman_id": "fraud-detection-api-v1",
+    "name": "Fraud Detection API",
+    "description": "Complete Postman collection for the Transaction API with Basic Fraud Detection.\n\nRun in order:\n1. Create User\n2. Normal Transaction (APPROVED)\n3. High Amount Transaction (FLAGGED)\n4. Velocity Transactions (FLAGGED on 4th)\n5. Get Flagged Transactions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "1. Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rahul Sharma\",\n  \"email\": \"rahul@example.com\",\n  \"balance\": 100000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Registers a new user with an initial balance of ₹1,00,000."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"User created successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Rahul Sharma\",\n    \"email\": \"rahul@example.com\",\n    \"balance\": 100000.00,\n    \"createdAt\": \"2024-04-21T14:30:00\"\n  },\n  \"timestamp\": \"2024-04-21T14:30:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            },
+            "description": "Retrieves user details and current balance."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "3. Normal Transaction (APPROVED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"amount\": 5000.00,\n  \"transactionType\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "₹5,000 DEBIT — passes both fraud rules. Balance is deducted. Status = APPROVED."
+          },
+          "response": [
+            {
+              "name": "201 Created - APPROVED",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Transaction approved\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 1,\n    \"amount\": 5000.00,\n    \"transactionType\": \"DEBIT\",\n    \"status\": \"APPROVED\",\n    \"newBalance\": 95000.00,\n    \"createdAt\": \"2024-04-21T14:31:00\"\n  },\n  \"timestamp\": \"2024-04-21T14:31:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. High Amount Transaction (FLAGGED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"amount\": 75000.00,\n  \"transactionType\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "₹75,000 DEBIT — triggers Rule 1: Amount exceeds ₹50,000 limit. Balance NOT deducted. Status = FLAGGED."
+          },
+          "response": [
+            {
+              "name": "200 OK - FLAGGED",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Transaction flagged as suspicious\",\n  \"data\": {\n    \"id\": 2,\n    \"userId\": 1,\n    \"amount\": 75000.00,\n    \"transactionType\": \"DEBIT\",\n    \"status\": \"FLAGGED\",\n    \"fraudReason\": \"Amount ₹75000.00 exceeds the allowed limit of ₹50000.00\",\n    \"createdAt\": \"2024-04-21T14:32:00\"\n  },\n  \"timestamp\": \"2024-04-21T14:32:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "5a. Velocity Test - Transaction 1",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"amount\": 1000.00,\n  \"transactionType\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "First of 4 rapid transactions. Send this 4 times quickly to trigger velocity rule."
+          },
+          "response": []
+        },
+        {
+          "name": "5b. Velocity Test - Transaction 2",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"amount\": 1000.00,\n  \"transactionType\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5c. Velocity Test - Transaction 3",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"amount\": 1000.00,\n  \"transactionType\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5d. Velocity Test - Transaction 4 (FLAGGED)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"amount\": 1000.00,\n  \"transactionType\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "4th transaction in quick succession — triggers Rule 2: Velocity check. Status = FLAGGED."
+          },
+          "response": [
+            {
+              "name": "200 OK - FLAGGED (Velocity)",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Transaction flagged as suspicious\",\n  \"data\": {\n    \"id\": 6,\n    \"userId\": 1,\n    \"amount\": 1000.00,\n    \"transactionType\": \"DEBIT\",\n    \"status\": \"FLAGGED\",\n    \"fraudReason\": \"Too many transactions: 3 in the last 5 minutes (limit: 3)\",\n    \"createdAt\": \"2024-04-21T14:33:00\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "6. Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Get User Transaction History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/user/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "user", "1"]
+            },
+            "description": "Returns all transactions for user with ID 1, newest first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fraud",
+      "item": [
+        {
+          "name": "8. Get All Flagged Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/fraud/flagged",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fraud", "flagged"]
+            },
+            "description": "Admin endpoint — returns all transactions flagged by fraud detection rules."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Found 2 flagged transaction(s)\",\n  \"data\": [\n    {\n      \"id\": 2,\n      \"userId\": 1,\n      \"amount\": 75000.00,\n      \"transactionType\": \"DEBIT\",\n      \"status\": \"FLAGGED\",\n      \"fraudReason\": \"Amount ₹75000.00 exceeds the allowed limit of ₹50000.00\",\n      \"createdAt\": \"2024-04-21T14:32:00\"\n    },\n    {\n      \"id\": 6,\n      \"userId\": 1,\n      \"amount\": 1000.00,\n      \"transactionType\": \"DEBIT\",\n      \"status\": \"FLAGGED\",\n      \"fraudReason\": \"Too many transactions: 3 in the last 5 minutes (limit: 3)\",\n      \"createdAt\": \"2024-04-21T14:33:00\"\n    }\n  ],\n  \"timestamp\": \"2024-04-21T14:34:00\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
