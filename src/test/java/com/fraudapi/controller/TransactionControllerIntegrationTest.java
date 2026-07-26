@@ -93,7 +93,7 @@ class TransactionControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("FLAGGED"))
-                .andExpect(jsonPath("$.data.fraudReason").value(containsString("exceeds")))
+                .andExpect(jsonPath("$.data.fraudReason").value(containsString("exceed")))
                 .andExpect(jsonPath("$.data.newBalance").doesNotExist());
     }
 

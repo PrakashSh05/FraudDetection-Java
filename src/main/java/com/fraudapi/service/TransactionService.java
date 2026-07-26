@@ -1,9 +1,13 @@
 package com.fraudapi.service;
 
+import com.fraudapi.constants.Decision;
 import com.fraudapi.constants.TransactionStatus;
 import com.fraudapi.constants.TransactionType;
+import com.fraudapi.dto.FraudDecision;
 import com.fraudapi.dto.TransactionRequest;
 import com.fraudapi.dto.TransactionResponse;
+import com.fraudapi.dto.TriggeredRule;
+import com.fraudapi.engine.TransactionContext;
 import com.fraudapi.exception.InsufficientBalanceException;
 import com.fraudapi.exception.TransactionNotFoundException;
 import com.fraudapi.exception.UserNotFoundException;
@@ -22,20 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Core business logic for transaction processing.
- *
- * <p><b>Processing flow:</b>
- * <ol>
- *   <li>Load the user (throws 404 if absent)</li>
- *   <li>Run fraud checks via {@link FraudDetectionService}</li>
- *   <li>If FLAGGED — persist without touching balance</li>
- *   <li>If APPROVED DEBIT — validate balance, deduct, save</li>
- *   <li>If APPROVED CREDIT — add to balance, save</li>
- * </ol>
- *
- * <p>All steps run in a single {@code @Transactional} boundary with
- * {@code REPEATABLE_READ} isolation to prevent lost-update anomalies when two
- * concurrent requests read the same balance before either writes it back.
+ * Core business logic for transaction processing integrated with {@link TransactionRiskService}.
  */
 @Service
 @RequiredArgsConstructor
@@ -44,10 +35,10 @@ public class TransactionService {
 
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
-    private final FraudDetectionService fraudDetectionService;
+    private final TransactionRiskService transactionRiskService;
 
     /**
-     * Creates a transaction after performing balance validation and fraud checks.
+     * Creates a transaction after performing risk evaluation and balance validation.
      *
      * @param request the transaction payload
      * @return the persisted transaction as a response DTO
@@ -65,8 +56,21 @@ public class TransactionService {
 
         BigDecimal amount = request.getAmount();
 
-        // Step 2 — fraud check
-        String fraudReason = fraudDetectionService.checkFraud(request.getUserId(), amount);
+        // Step 2 — build transaction context & perform risk evaluation
+        TransactionContext context = TransactionContext.builder()
+                .user(user)
+                .userId(user.getId())
+                .amount(amount)
+                .transactionType(request.getTransactionType())
+                .build();
+
+        FraudDecision fraudDecision = transactionRiskService.evaluateTransactionRisk(context);
+
+        log.info("Risk telemetry for userId={}: score={}, level={}, decision={}, triggeredRules={}, duration={}ms",
+                user.getId(), fraudDecision.getRiskScore(), fraudDecision.getRiskLevel(),
+                fraudDecision.getDecision(),
+                fraudDecision.getTriggeredRules() != null ? fraudDecision.getTriggeredRules().size() : 0,
+                fraudDecision.getProcessingTimeMs());
 
         Transaction txn = Transaction.builder()
                 .user(user)
@@ -74,16 +78,30 @@ public class TransactionService {
                 .transactionType(request.getTransactionType())
                 .build();
 
-        BigDecimal balanceAfter = user.getBalance(); // will be updated if APPROVED
+        BigDecimal balanceAfter = user.getBalance();
+        String fraudReason = null;
 
-        if (fraudReason != null) {
-            // Step 3 — FLAGGED: record the transaction without touching balance
+        Decision decision = fraudDecision.getDecision();
+
+        if (Decision.REJECTED.equals(decision) || Decision.REVIEW.equals(decision)) {
+            // Step 3 — REJECTED / REVIEW: flag transaction without modifying balance
             txn.setStatus(TransactionStatus.FLAGGED);
+            if (fraudDecision.getTriggeredRules() != null && !fraudDecision.getTriggeredRules().isEmpty()) {
+                fraudReason = fraudDecision.getTriggeredRules().stream()
+                        .map(TriggeredRule::getDescription)
+                        .collect(Collectors.joining("; "));
+            } else {
+                fraudReason = fraudDecision.getSummary();
+            }
             txn.setFraudReason(fraudReason);
-            log.warn("Transaction FLAGGED for userId={} reason='{}'", user.getId(), fraudReason);
+            log.warn("Transaction FLAGGED for userId={} decision={} reason='{}'", user.getId(), decision, fraudReason);
 
         } else {
-            // Step 4 — APPROVED: apply balance change
+            // Step 4 — APPROVED / MONITOR: proceed with balance modification
+            if (Decision.MONITOR.equals(decision)) {
+                log.info("Transaction MONITOR tier active for userId={}", user.getId());
+            }
+
             if (TransactionType.DEBIT.equals(request.getTransactionType())) {
                 if (user.getBalance().compareTo(amount) < 0) {
                     throw new InsufficientBalanceException(
