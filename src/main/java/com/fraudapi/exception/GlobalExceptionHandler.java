@@ -17,14 +17,6 @@ import java.util.Map;
  *
  * <p>Maps every custom and standard exception to the appropriate HTTP status code
  * and wraps the response in the standard {@link ApiResponse} envelope.
- *
- * <p><b>Status code mapping:</b>
- * <ul>
- *   <li>400 – InsufficientBalanceException, validation failures</li>
- *   <li>404 – UserNotFoundException, TransactionNotFoundException</li>
- *   <li>409 – DuplicateEmailException</li>
- *   <li>500 – any unhandled Exception</li>
- * </ul>
  */
 @RestControllerAdvice
 @Slf4j
@@ -63,6 +55,14 @@ public class GlobalExceptionHandler {
         log.warn("Duplicate email: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        log.warn("Invalid argument / state transition: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ex.getMessage()));
     }
 

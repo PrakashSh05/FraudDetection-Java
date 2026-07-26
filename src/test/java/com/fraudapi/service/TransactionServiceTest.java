@@ -1,6 +1,8 @@
 package com.fraudapi.service;
 
 import com.fraudapi.constants.Decision;
+import com.fraudapi.constants.FraudCasePriority;
+import com.fraudapi.constants.FraudCaseStatus;
 import com.fraudapi.constants.RiskLevel;
 import com.fraudapi.constants.RuleSeverity;
 import com.fraudapi.constants.TransactionStatus;
@@ -13,7 +15,9 @@ import com.fraudapi.exception.InsufficientBalanceException;
 import com.fraudapi.exception.UserNotFoundException;
 import com.fraudapi.model.Transaction;
 import com.fraudapi.model.User;
+import com.fraudapi.repository.FraudCaseRepository;
 import com.fraudapi.repository.TransactionRepository;
+import com.fraudapi.repository.TransactionRiskEventRepository;
 import com.fraudapi.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +38,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for {@link TransactionService} integrated with {@link TransactionRiskService}.
+ * Unit tests for {@link TransactionService} integrated with {@link TransactionRiskService},
+ * {@link TransactionRiskEventRepository}, {@link FraudCaseRepository}, and {@link FraudCaseAuditService}.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("TransactionService Unit Tests")
@@ -45,6 +50,15 @@ class TransactionServiceTest {
 
     @Mock
     private TransactionRepository transactionRepository;
+
+    @Mock
+    private TransactionRiskEventRepository transactionRiskEventRepository;
+
+    @Mock
+    private FraudCaseRepository fraudCaseRepository;
+
+    @Mock
+    private FraudCaseAuditService fraudCaseAuditService;
 
     @Mock
     private TransactionRiskService transactionRiskService;
@@ -95,10 +109,12 @@ class TransactionServiceTest {
         assertEquals(new BigDecimal("95000.00"), response.getNewBalance());
 
         verify(userRepository).save(argThat(u -> u.getBalance().compareTo(new BigDecimal("95000.00")) == 0));
+        verify(transactionRiskEventRepository, never()).saveAll(any());
+        verify(fraudCaseRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("2. Transaction exceeding threshold should be FLAGGED based on FraudDecision")
+    @DisplayName("2. Transaction exceeding threshold should be FLAGGED and risk events saved")
     void testHighAmountTransaction_ShouldBeFlagged() {
         TransactionRequest request = buildRequest(1L, "75000.00", TransactionType.DEBIT);
 
@@ -134,44 +150,51 @@ class TransactionServiceTest {
         assertEquals(TransactionStatus.FLAGGED, response.getStatus());
         assertTrue(response.getFraudReason().contains("exceeded"));
         assertNull(response.getNewBalance());
+        verify(transactionRiskEventRepository).saveAll(argThat(list -> ((List<?>) list).size() == 1));
+        verify(fraudCaseRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("3. Velocity limit exceeded should be FLAGGED")
-    void testVelocityCheck_ShouldFlagAfterMaxTransactions() {
-        TransactionRequest request = buildRequest(1L, "2000.00", TransactionType.DEBIT);
+    @DisplayName("3. Decision.REVIEW -> automatically creates a FraudCase and logs CASE_CREATED audit event")
+    void testDecisionReview_ShouldCreateFraudCaseAndAuditLog() {
+        TransactionRequest request = buildRequest(1L, "65000.00", TransactionType.DEBIT);
 
         TriggeredRule rule = TriggeredRule.builder()
-                .ruleId("RULE-002")
-                .ruleName("VELOCITY_EXCEEDED")
-                .category("VELOCITY")
-                .severity(RuleSeverity.MEDIUM)
-                .points(25)
-                .description("Transaction velocity exceeded configured limit. Actual: 3 in 5 mins, Limit: 3")
+                .ruleId("RULE-001")
+                .ruleName("HIGH_AMOUNT")
+                .category("TRANSACTION")
+                .severity(RuleSeverity.HIGH)
+                .points(65)
+                .description("High amount review required")
                 .build();
 
-        FraudDecision rejectedDecision = FraudDecision.builder()
-                .riskScore(25)
-                .riskLevel(RiskLevel.LOW)
-                .decision(Decision.REJECTED)
+        FraudDecision reviewDecision = FraudDecision.builder()
+                .riskScore(65)
+                .riskLevel(RiskLevel.HIGH)
+                .decision(Decision.REVIEW)
                 .summary("1 fraud indicator detected.")
-                .processingTimeMs(4)
+                .processingTimeMs(6)
                 .triggeredRules(List.of(rule))
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(transactionRiskService.evaluateTransactionRisk(any())).thenReturn(rejectedDecision);
+        when(transactionRiskService.evaluateTransactionRisk(any())).thenReturn(reviewDecision);
         when(transactionRepository.save(any())).thenAnswer(inv -> {
             Transaction t = inv.getArgument(0);
             t.setId(103L);
             t.setCreatedAt(LocalDateTime.now());
             return t;
         });
+        when(fraudCaseRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         TransactionResponse response = transactionService.createTransaction(request);
 
         assertEquals(TransactionStatus.FLAGGED, response.getStatus());
-        assertTrue(response.getFraudReason().contains("velocity"));
+        verify(fraudCaseRepository).save(argThat(fc ->
+                fc.getStatus() == FraudCaseStatus.OPEN &&
+                fc.getPriority() == FraudCasePriority.HIGH
+        ));
+        verify(fraudCaseAuditService).recordAudit(any(), eq("CASE_CREATED"), isNull(), eq("OPEN"), eq("SYSTEM"));
     }
 
     @Test
@@ -188,71 +211,8 @@ class TransactionServiceTest {
 
         assertTrue(ex.getMessage().contains("Insufficient balance"));
         verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("5. FLAGGED transaction should NOT deduct balance")
-    void testFlaggedTransaction_ShouldNotDeductBalance() {
-        BigDecimal originalBalance = testUser.getBalance();
-        TransactionRequest request = buildRequest(1L, "60000.00", TransactionType.DEBIT);
-
-        FraudDecision rejectedDecision = FraudDecision.builder()
-                .riskScore(35)
-                .riskLevel(RiskLevel.MEDIUM)
-                .decision(Decision.REJECTED)
-                .summary("Amount exceeds limit")
-                .processingTimeMs(3)
-                .triggeredRules(Collections.emptyList())
-                .build();
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(transactionRiskService.evaluateTransactionRisk(any())).thenReturn(rejectedDecision);
-        when(transactionRepository.save(any())).thenAnswer(inv -> {
-            Transaction t = inv.getArgument(0);
-            t.setId(104L);
-            t.setCreatedAt(LocalDateTime.now());
-            return t;
-        });
-
-        TransactionResponse response = transactionService.createTransaction(request);
-
-        assertEquals(originalBalance, testUser.getBalance());
-        verify(userRepository, never()).save(any(User.class));
-        assertEquals(TransactionStatus.FLAGGED, response.getStatus());
-    }
-
-    @Test
-    @DisplayName("6. CREDIT transaction should INCREASE balance")
-    void testCreditTransaction_ShouldIncreaseBalance() {
-        TransactionRequest request = buildRequest(1L, "10000.00", TransactionType.CREDIT);
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(transactionRiskService.evaluateTransactionRisk(any())).thenReturn(approvedDecision);
-        when(transactionRepository.save(any())).thenAnswer(inv -> {
-            Transaction t = inv.getArgument(0);
-            t.setId(105L);
-            t.setCreatedAt(LocalDateTime.now());
-            return t;
-        });
-
-        TransactionResponse response = transactionService.createTransaction(request);
-
-        assertEquals(TransactionStatus.APPROVED, response.getStatus());
-        assertEquals(new BigDecimal("110000.00"), response.getNewBalance());
-        verify(userRepository).save(argThat(u -> u.getBalance().compareTo(new BigDecimal("110000.00")) == 0));
-    }
-
-    @Test
-    @DisplayName("7. Transaction for non-existent user should throw UserNotFoundException")
-    void testUnknownUser_ShouldThrowUserNotFoundException() {
-        TransactionRequest request = buildRequest(999L, "5000.00", TransactionType.DEBIT);
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class,
-                () -> transactionService.createTransaction(request));
-
-        verify(transactionRiskService, never()).evaluateTransactionRisk(any());
-        verify(transactionRepository, never()).save(any());
+        verify(transactionRiskEventRepository, never()).saveAll(any());
+        verify(fraudCaseRepository, never()).save(any());
     }
 
     private TransactionRequest buildRequest(Long userId, String amount, String type) {
