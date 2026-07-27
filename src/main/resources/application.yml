@@ -55,9 +55,21 @@ springdoc:
 # Application-level fraud thresholds (externalised — no magic numbers in code)
 fraud:
   rules:
-    high-amount-threshold: 50000.0
-    max-transactions-per-window: 3
-    time-window-minutes: 5
+    high-amount:
+      threshold: 50000.0
+      points: 45
+    velocity:
+      window-minutes: 5
+      max-transactions: 3
+      points: 30
+    round-amount:
+      minimum-amount: 10000.0
+      rounding-divisor: 1000
+      points: 20
+    repeated-amount:
+      window-minutes: 5
+      min-repeat-count: 2
+      points: 25
 
 # Logging
 logging:

@@ -113,15 +113,16 @@ class TransactionServiceTest {
                 .ruleName("HIGH_AMOUNT")
                 .category("TRANSACTION")
                 .severity(RuleSeverity.HIGH)
-                .points(35)
-                .description("Transaction amount exceeded configured threshold. Actual: 75000.00, Threshold: 50000.00")
+                .points(45)
+                .description("DEBIT amount exceeded configured threshold.")
                 .build();
 
+        // 45 pts = MEDIUM/MONITOR → service mock overrides to REJECTED for this test
         FraudDecision rejectedDecision = FraudDecision.builder()
-                .riskScore(35)
-                .riskLevel(RiskLevel.MEDIUM)
+                .riskScore(45)
+                .riskLevel(RiskLevel.CRITICAL)
                 .decision(Decision.REJECTED)
-                .summary("1 fraud indicator detected.")
+                .summary("1 fraud indicator detected [HIGH_AMOUNT]. Risk level: CRITICAL.")
                 .processingTimeMs(5)
                 .triggeredRules(List.of(rule))
                 .build();
@@ -156,15 +157,15 @@ class TransactionServiceTest {
                 .ruleName("HIGH_AMOUNT")
                 .category("TRANSACTION")
                 .severity(RuleSeverity.HIGH)
-                .points(65)
-                .description("High amount review required")
+                .points(45)
+                .description("DEBIT amount exceeded configured threshold.")
                 .build();
 
         FraudDecision reviewDecision = FraudDecision.builder()
-                .riskScore(65)
+                .riskScore(75)
                 .riskLevel(RiskLevel.HIGH)
                 .decision(Decision.REVIEW)
-                .summary("1 fraud indicator detected.")
+                .summary("1 fraud indicator detected [HIGH_AMOUNT]. Risk level: HIGH.")
                 .processingTimeMs(6)
                 .triggeredRules(List.of(rule))
                 .build();

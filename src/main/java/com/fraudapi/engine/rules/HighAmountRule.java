@@ -58,6 +58,11 @@ public class HighAmountRule implements FraudRule {
             return Optional.empty();
         }
 
+        // Large CREDITs are legitimate (salary, incoming wire). Only penalize large DEBITs.
+        if ("CREDIT".equalsIgnoreCase(context.getTransactionType())) {
+            return Optional.empty();
+        }
+
         double threshold = properties.getHighAmount().getThreshold();
         BigDecimal thresholdBd = BigDecimal.valueOf(threshold);
 
@@ -66,7 +71,7 @@ public class HighAmountRule implements FraudRule {
                     RULE_ID, context.getUserId(), context.getAmount(), threshold);
 
             String description = String.format(
-                    "Transaction amount exceeded configured threshold. Actual: %.2f, Threshold: %.2f",
+                    "DEBIT amount exceeded configured threshold. Actual: %.2f, Threshold: %.2f",
                     context.getAmount().doubleValue(), threshold);
 
             TriggeredRule triggered = TriggeredRule.builder()

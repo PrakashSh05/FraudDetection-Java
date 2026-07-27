@@ -46,4 +46,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
            "WHERE t.user.id = :userId AND t.createdAt > :after")
     long countRecentTransactions(@Param("userId") Long userId,
                                   @Param("after") LocalDateTime after);
+
+    /**
+     * Count of transactions for a user with the exact same amount within a given time window.
+     * Used by the RepeatedAmountRule to detect structuring / split-payment fraud.
+     */
+    @Query("SELECT COUNT(t) FROM Transaction t " +
+           "WHERE t.user.id = :userId AND t.amount = :amount AND t.createdAt > :after")
+    long countRepeatedAmountTransactions(@Param("userId") Long userId,
+                                          @Param("amount") java.math.BigDecimal amount,
+                                          @Param("after") LocalDateTime after);
 }

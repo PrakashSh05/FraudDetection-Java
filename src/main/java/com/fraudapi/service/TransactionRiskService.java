@@ -101,16 +101,20 @@ public class TransactionRiskService {
     }
 
     /**
-     * Generates a concise human-readable summary of the evaluation result.
+     * Generates a concise human-readable summary of the evaluation result,
+     * including the names of triggered rules for analyst visibility.
      */
     private String generateSummary(List<TriggeredRule> triggeredRules, RiskLevel riskLevel) {
-        int count = triggeredRules.size();
-        if (count == 0) {
+        if (triggeredRules.isEmpty()) {
             return "No fraud indicators detected.";
-        } else if (count == 1) {
-            return "1 fraud indicator detected.";
-        } else {
-            return count + " fraud indicators detected.";
         }
+
+        String ruleNames = triggeredRules.stream()
+                .map(TriggeredRule::getRuleName)
+                .collect(java.util.stream.Collectors.joining(", "));
+
+        int count = triggeredRules.size();
+        String indicator = count == 1 ? "fraud indicator" : "fraud indicators";
+        return String.format("%d %s detected [%s]. Risk level: %s.", count, indicator, ruleNames, riskLevel);
     }
 }
