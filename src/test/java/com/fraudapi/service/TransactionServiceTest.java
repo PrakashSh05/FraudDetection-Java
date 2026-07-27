@@ -1,6 +1,7 @@
 package com.fraudapi.service;
 
 import com.fraudapi.constants.Decision;
+import com.fraudapi.constants.FraudCaseAuditEventType;
 import com.fraudapi.constants.FraudCasePriority;
 import com.fraudapi.constants.FraudCaseStatus;
 import com.fraudapi.constants.RiskLevel;
@@ -194,7 +195,7 @@ class TransactionServiceTest {
                 fc.getStatus() == FraudCaseStatus.OPEN &&
                 fc.getPriority() == FraudCasePriority.HIGH
         ));
-        verify(fraudCaseAuditService).recordAudit(any(), eq("CASE_CREATED"), isNull(), eq("OPEN"), eq("SYSTEM"));
+        verify(fraudCaseAuditService).recordAudit(any(), eq(FraudCaseAuditEventType.CASE_CREATED), isNull(), eq("OPEN"), eq("SYSTEM"));
     }
 
     @Test

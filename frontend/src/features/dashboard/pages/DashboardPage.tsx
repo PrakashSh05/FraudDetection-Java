@@ -1,4 +1,3 @@
-import React from 'react';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { KpiCardsSection } from '../components/KpiCardsSection';
 import { RiskDistributionWidget } from '../components/RiskDistributionWidget';
@@ -8,7 +7,7 @@ import { QueueSummaryWidget } from '../components/QueueSummaryWidget';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 
-export const DashboardPage: React.FC = () => {
+export const DashboardPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader

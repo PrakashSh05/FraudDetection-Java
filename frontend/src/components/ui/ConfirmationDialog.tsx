@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 import { Button } from './Button';
 import { AlertTriangle, Info, AlertOctagon } from 'lucide-react';
 
@@ -15,7 +15,7 @@ interface ConfirmationDialogProps {
   children?: ReactNode;
 }
 
-export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+export const ConfirmationDialog = ({
   isOpen,
   onClose,
   onConfirm,
@@ -26,7 +26,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   variant = 'primary',
   isLoading = false,
   children,
-}) => {
+}: ConfirmationDialogProps) => {
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 

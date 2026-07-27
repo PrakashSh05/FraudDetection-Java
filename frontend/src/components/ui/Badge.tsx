@@ -1,16 +1,16 @@
-import React from 'react';
+import { ReactNode } from 'react';
 
 interface BadgeProps {
-  children: React.ReactNode;
+  children: ReactNode;
   variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
   size?: 'sm' | 'md';
 }
 
-export const Badge: React.FC<BadgeProps> = ({
+export const Badge = ({
   children,
   variant = 'neutral',
   size = 'md',
-}) => {
+}: BadgeProps) => {
   const variantStyles = {
     success: 'bg-emerald-50 text-[#10B981] border-emerald-200',
     warning: 'bg-amber-50 text-[#F59E0B] border-amber-200',

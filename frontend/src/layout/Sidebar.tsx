@@ -1,13 +1,12 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, ShieldAlert, BarChart3, SearchCode, Shield } from 'lucide-react';
 
-export const Sidebar: React.FC = () => {
+export const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Cases', path: '/cases', icon: ShieldAlert },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
-    { name: 'Investigation', path: '/investigation/101', icon: SearchCode },
+    { name: 'Investigation', path: '/investigation/1', icon: SearchCode },
   ];
 
   return (

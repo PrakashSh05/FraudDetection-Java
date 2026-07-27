@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FraudCaseSummary } from '../types';
 import { DataTable, Column } from '../../../components/ui/DataTable';
@@ -13,7 +12,7 @@ interface CasesTableProps {
   onSortChange: (sortField: string) => void;
 }
 
-export const CasesTable: React.FC<CasesTableProps> = ({ cases, sortParam, onSortChange }) => {
+export const CasesTable = ({ cases, sortParam, onSortChange }: CasesTableProps) => {
   const navigate = useNavigate();
 
   const handleViewCase = (caseId: number) => {

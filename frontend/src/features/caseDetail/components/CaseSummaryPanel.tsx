@@ -1,10 +1,8 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FraudCaseDetailResponse } from '../types';
 import { DetailSection } from '../../../components/ui/DetailSection';
 import { KeyValueGrid } from '../../../components/ui/KeyValueGrid';
 import { Badge } from '../../../components/ui/Badge';
-import { Button } from '../../../components/ui/Button';
 import { STATUS_THEME_MAP, PRIORITY_THEME_MAP } from '../../../lib/statusTheme';
 import { formatDate } from '../../../utils/date';
 import { ExternalLink } from 'lucide-react';
@@ -13,7 +11,7 @@ interface CaseSummaryPanelProps {
   caseDetail: FraudCaseDetailResponse;
 }
 
-export const CaseSummaryPanel: React.FC<CaseSummaryPanelProps> = ({ caseDetail }) => {
+export const CaseSummaryPanel = ({ caseDetail }: CaseSummaryPanelProps) => {
   const navigate = useNavigate();
   const statusConfig = STATUS_THEME_MAP[caseDetail.status] || { variant: 'neutral', label: caseDetail.status };
   const priorityConfig = PRIORITY_THEME_MAP[caseDetail.priority] || { variant: 'neutral', label: caseDetail.priority };

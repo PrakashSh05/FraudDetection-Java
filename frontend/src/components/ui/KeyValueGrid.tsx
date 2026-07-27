@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 export interface KeyValueItem {
   label: string;
@@ -11,7 +11,7 @@ interface KeyValueGridProps {
   cols?: 2 | 3 | 4;
 }
 
-export const KeyValueGrid: React.FC<KeyValueGridProps> = ({ items, cols = 2 }) => {
+export const KeyValueGrid = ({ items, cols = 2 }: KeyValueGridProps) => {
   const colStyles = {
     2: 'grid-cols-1 sm:grid-cols-2',
     3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',

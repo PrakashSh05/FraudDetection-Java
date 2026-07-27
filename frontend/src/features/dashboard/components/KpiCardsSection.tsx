@@ -1,10 +1,9 @@
-import React from 'react';
 import { useAnalyticsOverview, useQueueSummary } from '../api/useDashboardData';
 import { StatCard } from '../../../components/ui/StatCard';
 import { SkeletonCard } from './SkeletonLoaders';
 import { Activity, CheckCircle, AlertTriangle, XCircle, ShieldAlert, Flame, Gauge } from 'lucide-react';
 
-export const KpiCardsSection: React.FC = () => {
+export const KpiCardsSection = () => {
   const { data: overview, isLoading: isOverviewLoading, isError: isOverviewError } = useAnalyticsOverview();
   const { data: queueSummary, isLoading: isQueueLoading } = useQueueSummary();
 

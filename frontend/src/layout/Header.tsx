@@ -1,7 +1,6 @@
-import React from 'react';
 import { Bell, Search, RefreshCw } from 'lucide-react';
 
-export const Header: React.FC = () => {
+export const Header = () => {
   return (
     <header className="h-16 bg-white border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10">
       {/* Search Bar */}

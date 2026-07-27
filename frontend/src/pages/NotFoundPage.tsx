@@ -1,9 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { AlertOctagon } from 'lucide-react';
 
-export const NotFoundPage: React.FC = () => {
+export const NotFoundPage = () => {
   return (
     <div className="min-h-screen bg-[#F6F7EB] flex flex-col items-center justify-center p-6 text-center">
       <div className="p-4 bg-red-50 text-[#E94F37] rounded-full mb-4">

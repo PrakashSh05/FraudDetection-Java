@@ -1,24 +1,70 @@
-import React from 'react';
 import { PageHeader } from '../components/ui/PageHeader';
-import { Card } from '../components/ui/Card';
-import { BarChart3 } from 'lucide-react';
+import { StatCard } from '../components/ui/StatCard';
+import { useAnalyticsOverview } from '../features/dashboard/api/useDashboardData';
+import { RiskDistributionWidget } from '../features/dashboard/components/RiskDistributionWidget';
+import { DailyTrendWidget } from '../features/dashboard/components/DailyTrendWidget';
+import { TopRulesWidget } from '../features/dashboard/components/TopRulesWidget';
+import { Activity, ShieldCheck, AlertTriangle, ShieldX, Gauge } from 'lucide-react';
 
-export const AnalyticsPlaceholder: React.FC = () => {
+export const AnalyticsPlaceholder = () => {
+  const { data: overview, isLoading: overviewLoading } = useAnalyticsOverview();
+
+  const total = overview?.totalTransactions || 0;
+  const approvedPct = total > 0 ? Math.round(((overview?.approvedTransactions || 0) / total) * 100) : 0;
+  const reviewPct = total > 0 ? Math.round(((overview?.reviewTransactions || 0) / total) * 100) : 0;
+  const rejectedPct = total > 0 ? Math.round(((overview?.rejectedTransactions || 0) / total) * 100) : 0;
+
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Fraud Risk Analytics"
-        subtitle="Aggregated Insights, Top Fired Rules, and Daily Risk Level Trends"
+        subtitle="Aggregated risk telemetry, top rule execution frequencies, and daily trend analysis"
       />
 
-      <Card title="Analytics Reporting Module">
-        <div className="p-12 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200 flex flex-col items-center">
-          <BarChart3 className="w-8 h-8 text-[#E94F37] mb-3" />
-          <p className="text-sm font-medium text-[#393E41]">
-            Analytics charts and reporting tables will be rendered in Sprint 4 analytics views.
-          </p>
-        </div>
-      </Card>
+      {/* KPI Overview Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard
+          title="TOTAL EVALUATED"
+          value={overviewLoading ? '...' : total.toLocaleString()}
+          subtitle="Total transaction volume"
+          icon={<Activity className="w-5 h-5 text-indigo-500" />}
+        />
+        <StatCard
+          title="AUTO-APPROVED"
+          value={overviewLoading ? '...' : `${approvedPct}%`}
+          subtitle={`${overview?.approvedTransactions || 0} clear transactions`}
+          icon={<ShieldCheck className="w-5 h-5 text-emerald-500" />}
+        />
+        <StatCard
+          title="REVIEW TIER"
+          value={overviewLoading ? '...' : `${reviewPct}%`}
+          subtitle={`${overview?.reviewTransactions || 0} flagged for review`}
+          icon={<AlertTriangle className="w-5 h-5 text-amber-500" />}
+        />
+        <StatCard
+          title="REJECTED TIER"
+          value={overviewLoading ? '...' : `${rejectedPct}%`}
+          subtitle={`${overview?.rejectedTransactions || 0} blocked transactions`}
+          icon={<ShieldX className="w-5 h-5 text-rose-500" />}
+        />
+        <StatCard
+          title="AVG RISK INDEX"
+          value={overviewLoading ? '...' : `${overview?.averageRiskScore || 0} / 100`}
+          subtitle="System-wide risk score average"
+          icon={<Gauge className="w-5 h-5 text-purple-500" />}
+        />
+      </div>
+
+      {/* Analytics Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RiskDistributionWidget />
+        <DailyTrendWidget />
+      </div>
+
+      {/* Top Rules Breakdown */}
+      <div className="grid grid-cols-1 gap-6">
+        <TopRulesWidget />
+      </div>
     </div>
   );
 };

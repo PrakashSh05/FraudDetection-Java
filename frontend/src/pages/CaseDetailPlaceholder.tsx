@@ -1,10 +1,9 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 
-export const CaseDetailPlaceholder: React.FC = () => {
+export const CaseDetailPlaceholder = () => {
   const { id } = useParams<{ id: string }>();
 
   return (

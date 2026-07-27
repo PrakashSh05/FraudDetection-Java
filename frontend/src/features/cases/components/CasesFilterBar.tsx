@@ -1,4 +1,3 @@
-import React from 'react';
 import { CasesFilterParams } from '../types';
 import { Button } from '../../../components/ui/Button';
 import { Search, RotateCcw, Filter } from 'lucide-react';
@@ -11,13 +10,13 @@ interface CasesFilterBarProps {
   onSearchChange: (value: string) => void;
 }
 
-export const CasesFilterBar: React.FC<CasesFilterBarProps> = ({
+export const CasesFilterBar = ({
   filters,
   onFilterChange,
   onReset,
   searchValue,
   onSearchChange,
-}) => {
+}: CasesFilterBarProps) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 space-y-4">
       <div className="flex items-center justify-between">

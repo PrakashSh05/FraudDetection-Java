@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { useFraudCaseDetails } from '../api/useCaseDetailData';
@@ -9,7 +8,7 @@ import { SkeletonCaseDetail } from '../components/SkeletonCaseDetail';
 import { Button } from '../../../components/ui/Button';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
 
-export const CaseDetailPage: React.FC = () => {
+export const CaseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

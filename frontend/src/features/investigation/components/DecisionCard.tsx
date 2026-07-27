@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -10,12 +10,12 @@ interface DecisionCardProps {
   transactionId: number;
 }
 
-export const DecisionCard: React.FC<DecisionCardProps> = ({ decision, transactionId }) => {
+export const DecisionCard = ({ decision, transactionId }: DecisionCardProps) => {
   const navigate = useNavigate();
 
   const decisionConfigs: Record<
     string,
-    { variant: 'success' | 'warning' | 'danger' | 'info'; icon: React.ReactNode; explanation: string }
+    { variant: 'success' | 'warning' | 'danger' | 'info'; icon: ReactNode; explanation: string }
   > = {
     APPROVED: {
       variant: 'success',

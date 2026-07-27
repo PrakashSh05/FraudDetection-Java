@@ -1,11 +1,10 @@
-import React from 'react';
 import { useDailyTrend } from '../api/useDashboardData';
 import { DashboardWidget } from '../../../components/ui/DashboardWidget';
 import { SkeletonChart } from './SkeletonLoaders';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { CHART_COLORS } from '../../../lib/chartColors';
 
-export const DailyTrendWidget: React.FC = () => {
+export const DailyTrendWidget = () => {
   const { data, isLoading, isError, refetch } = useDailyTrend();
 
   return (

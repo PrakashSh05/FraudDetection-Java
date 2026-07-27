@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 interface PageHeaderProps {
   title: string;
@@ -6,11 +6,11 @@ interface PageHeaderProps {
   action?: ReactNode;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({
+export const PageHeader = ({
   title,
   subtitle,
   action,
-}) => {
+}: PageHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between pb-6 mb-6 border-b border-gray-200">
       <div>

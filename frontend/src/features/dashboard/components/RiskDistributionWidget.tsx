@@ -1,11 +1,10 @@
-import React from 'react';
 import { useRiskDistribution } from '../api/useDashboardData';
 import { DashboardWidget } from '../../../components/ui/DashboardWidget';
 import { SkeletonChart } from './SkeletonLoaders';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { RISK_LEVEL_COLORS } from '../../../lib/chartColors';
 
-export const RiskDistributionWidget: React.FC = () => {
+export const RiskDistributionWidget = () => {
   const { data, isLoading, isError, refetch } = useRiskDistribution();
 
   const chartData = data?.map((item) => ({

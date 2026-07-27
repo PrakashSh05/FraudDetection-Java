@@ -1,4 +1,3 @@
-import React from 'react';
 import { TriggeredRuleDetails } from '../types';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -9,7 +8,7 @@ interface TriggeredRulesListProps {
   rules: TriggeredRuleDetails[];
 }
 
-export const TriggeredRulesList: React.FC<TriggeredRulesListProps> = ({ rules }) => {
+export const TriggeredRulesList = ({ rules }: TriggeredRulesListProps) => {
   return (
     <Card
       title={`Triggered Fraud Rules (${rules.length})`}

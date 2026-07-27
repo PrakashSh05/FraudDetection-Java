@@ -92,3 +92,12 @@ surefire-reports/
 
 # JaCoCo coverage
 jacoco.exec
+
+# Node & Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+.eslintcache
+

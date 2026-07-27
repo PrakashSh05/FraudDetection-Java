@@ -1,6 +1,4 @@
-import React from 'react';
-
-export const SkeletonTable: React.FC = () => {
+export const SkeletonTable = () => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
       <div className="h-4 bg-gray-200 rounded w-48 mb-6"></div>

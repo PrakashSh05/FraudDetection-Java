@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { apiClient } from '../../../lib/api';
 import { ApiResponse } from '../../../types/api';
 import {
@@ -37,7 +38,12 @@ export const useCaseTimeline = (caseId: string | undefined) => {
 export const useAssignCaseMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    FraudCaseDetailResponse,
+    AxiosError<ApiResponse<never>>,
+    AssignCasePayload,
+    { previousDetail?: FraudCaseDetailResponse }
+  >({
     mutationFn: async ({ caseId, assignedTo }: AssignCasePayload) => {
       const res = await apiClient.patch<unknown, ApiResponse<FraudCaseDetailResponse>>(
         `/cases/${caseId}/assign`,
@@ -64,7 +70,7 @@ export const useAssignCaseMutation = () => {
         queryClient.setQueryData(['cases', 'detail', String(caseId)], context.previousDetail);
       }
     },
-    onSettled: (_data, _error, { caseId }) => {
+    onSettled: (_, __, { caseId }) => {
       queryClient.invalidateQueries({ queryKey: ['cases', 'detail', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'timeline', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'queue'] });
@@ -76,7 +82,12 @@ export const useAssignCaseMutation = () => {
 export const useUpdateCaseStatusMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    FraudCaseDetailResponse,
+    AxiosError<ApiResponse<never>>,
+    UpdateStatusPayload,
+    { previousDetail?: FraudCaseDetailResponse }
+  >({
     mutationFn: async ({ caseId, status }: UpdateStatusPayload) => {
       const res = await apiClient.patch<unknown, ApiResponse<FraudCaseDetailResponse>>(
         `/cases/${caseId}/status`,
@@ -102,7 +113,7 @@ export const useUpdateCaseStatusMutation = () => {
         queryClient.setQueryData(['cases', 'detail', String(caseId)], context.previousDetail);
       }
     },
-    onSettled: (_data, _error, { caseId }) => {
+    onSettled: (_, __, { caseId }) => {
       queryClient.invalidateQueries({ queryKey: ['cases', 'detail', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'timeline', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'queue'] });
@@ -114,7 +125,12 @@ export const useUpdateCaseStatusMutation = () => {
 export const useUpdateCaseNotesMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    FraudCaseDetailResponse,
+    AxiosError<ApiResponse<never>>,
+    UpdateNotesPayload,
+    { previousDetail?: FraudCaseDetailResponse }
+  >({
     mutationFn: async ({ caseId, reviewNotes }: UpdateNotesPayload) => {
       const res = await apiClient.patch<unknown, ApiResponse<FraudCaseDetailResponse>>(
         `/cases/${caseId}/notes`,
@@ -140,7 +156,7 @@ export const useUpdateCaseNotesMutation = () => {
         queryClient.setQueryData(['cases', 'detail', String(caseId)], context.previousDetail);
       }
     },
-    onSettled: (_data, _error, { caseId }) => {
+    onSettled: (_, __, { caseId }) => {
       queryClient.invalidateQueries({ queryKey: ['cases', 'detail', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'timeline', String(caseId)] });
     },
@@ -150,7 +166,12 @@ export const useUpdateCaseNotesMutation = () => {
 export const useResolveCaseMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    FraudCaseDetailResponse,
+    AxiosError<ApiResponse<never>>,
+    ResolveCasePayload,
+    { previousDetail?: FraudCaseDetailResponse }
+  >({
     mutationFn: async ({ caseId, resolution, status }: ResolveCasePayload) => {
       const res = await apiClient.patch<unknown, ApiResponse<FraudCaseDetailResponse>>(
         `/cases/${caseId}/resolve`,
@@ -178,7 +199,7 @@ export const useResolveCaseMutation = () => {
         queryClient.setQueryData(['cases', 'detail', String(caseId)], context.previousDetail);
       }
     },
-    onSettled: (_data, _error, { caseId }) => {
+    onSettled: (_, __, { caseId }) => {
       queryClient.invalidateQueries({ queryKey: ['cases', 'detail', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'timeline', String(caseId)] });
       queryClient.invalidateQueries({ queryKey: ['cases', 'queue'] });

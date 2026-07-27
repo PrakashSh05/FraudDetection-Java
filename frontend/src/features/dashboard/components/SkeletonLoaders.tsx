@@ -1,6 +1,4 @@
-import React from 'react';
-
-export const SkeletonCard: React.FC = () => {
+export const SkeletonCard = () => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-pulse">
       <div className="flex items-center justify-between">
@@ -15,7 +13,7 @@ export const SkeletonCard: React.FC = () => {
   );
 };
 
-export const SkeletonChart: React.FC = () => {
+export const SkeletonChart = () => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
       <div className="h-4 bg-gray-200 rounded w-40 mb-6"></div>
@@ -26,7 +24,7 @@ export const SkeletonChart: React.FC = () => {
   );
 };
 
-export const SkeletonSummary: React.FC = () => {
+export const SkeletonSummary = () => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse space-y-4">
       <div className="h-4 bg-gray-200 rounded w-32"></div>

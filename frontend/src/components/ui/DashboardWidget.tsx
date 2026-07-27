@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Card } from './Card';
 import { Button } from './Button';
 import { AlertCircle } from 'lucide-react';
@@ -17,7 +17,7 @@ interface DashboardWidgetProps {
   children: ReactNode;
 }
 
-export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
+export const DashboardWidget = ({
   title,
   subtitle,
   action,
@@ -29,7 +29,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   onRetry,
   skeleton,
   children,
-}) => {
+}: DashboardWidgetProps) => {
   if (isLoading) {
     if (skeleton) return <>{skeleton}</>;
     return (

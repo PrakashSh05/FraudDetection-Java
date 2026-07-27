@@ -1,6 +1,4 @@
-import React from 'react';
-
-export const SkeletonInvestigation: React.FC = () => {
+export const SkeletonInvestigation = () => {
   return (
     <div className="space-y-6 animate-pulse">
       <div className="h-8 bg-gray-200 rounded w-64"></div>

@@ -40,7 +40,7 @@ class AnalyticsServiceTest {
     void testGetOverviewAnalytics() {
         when(analyticsRepository.count()).thenReturn(100L);
         when(analyticsRepository.getAverageRiskScore()).thenReturn(28.45);
-        when(analyticsRepository.countByDecisionGrouped()).thenReturn(List.of(
+        when(analyticsRepository.countByDecisionGrouped()).thenReturn(List.<Object[]>of(
                 new Object[]{"APPROVED", 70L},
                 new Object[]{"MONITOR", 15L},
                 new Object[]{"REVIEW", 10L},
@@ -61,7 +61,7 @@ class AnalyticsServiceTest {
     @Test
     @DisplayName("Risk distribution should contain counts for all 4 risk tiers")
     void testGetRiskDistributionAnalytics() {
-        when(analyticsRepository.countByRiskLevelGrouped()).thenReturn(List.of(
+        when(analyticsRepository.countByRiskLevelGrouped()).thenReturn(List.<Object[]>of(
                 new Object[]{"LOW", 60L},
                 new Object[]{"MEDIUM", 25L},
                 new Object[]{"HIGH", 10L},
@@ -79,7 +79,7 @@ class AnalyticsServiceTest {
     @Test
     @DisplayName("Top rules should map rule trigger frequencies")
     void testGetTopRulesAnalytics() {
-        when(analyticsRepository.findTopTriggeredRules()).thenReturn(List.of(
+        when(analyticsRepository.findTopTriggeredRules()).thenReturn(List.<Object[]>of(
                 new Object[]{"RULE-001", "HIGH_AMOUNT", 12L},
                 new Object[]{"RULE-002", "VELOCITY_EXCEEDED", 8L}
         ));
@@ -95,7 +95,7 @@ class AnalyticsServiceTest {
     @Test
     @DisplayName("Daily trends should map date, count, and average score")
     void testGetDailyTrendAnalytics() {
-        when(analyticsRepository.getDailyTrendMetrics()).thenReturn(List.of(
+        when(analyticsRepository.getDailyTrendMetrics()).thenReturn(List.<Object[]>of(
                 new Object[]{"2026-07-26", 15L, 32.5}
         ));
 

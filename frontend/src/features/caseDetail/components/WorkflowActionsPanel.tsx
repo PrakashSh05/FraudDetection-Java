@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FraudCaseDetailResponse } from '../types';
 import {
   useAssignCaseMutation,
@@ -16,7 +16,7 @@ interface WorkflowActionsPanelProps {
   caseDetail: FraudCaseDetailResponse;
 }
 
-export const WorkflowActionsPanel: React.FC<WorkflowActionsPanelProps> = ({ caseDetail }) => {
+export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) => {
   const isClosed = caseDetail.status === 'CLOSED';
   const { showToast } = useToast();
 
@@ -42,7 +42,7 @@ export const WorkflowActionsPanel: React.FC<WorkflowActionsPanelProps> = ({ case
       { caseId: caseDetail.caseId, assignedTo: assignedToInput.trim() },
       {
         onSuccess: () => showToast('Analyst assigned successfully', 'success'),
-        onError: (err: any) => showToast(err?.response?.data?.message || 'Assignment failed', 'danger'),
+        onError: (err) => showToast(err.response?.data?.message || 'Assignment failed', 'danger'),
       }
     );
   };
@@ -52,7 +52,7 @@ export const WorkflowActionsPanel: React.FC<WorkflowActionsPanelProps> = ({ case
       { caseId: caseDetail.caseId, status: statusSelect },
       {
         onSuccess: () => showToast(`Status updated to ${statusSelect}`, 'success'),
-        onError: (err: any) => showToast(err?.response?.data?.message || 'Status transition failed', 'danger'),
+        onError: (err) => showToast(err.response?.data?.message || 'Status transition failed', 'danger'),
       }
     );
   };
@@ -63,7 +63,7 @@ export const WorkflowActionsPanel: React.FC<WorkflowActionsPanelProps> = ({ case
       { caseId: caseDetail.caseId, reviewNotes: notesInput.trim() },
       {
         onSuccess: () => showToast('Review notes updated successfully', 'success'),
-        onError: (err: any) => showToast(err?.response?.data?.message || 'Failed to update notes', 'danger'),
+        onError: (err) => showToast(err.response?.data?.message || 'Failed to update notes', 'danger'),
       }
     );
   };
@@ -77,9 +77,9 @@ export const WorkflowActionsPanel: React.FC<WorkflowActionsPanelProps> = ({ case
           setIsResolveModalOpen(false);
           showToast(`Case finalized with ${resolveStatusSelect}`, 'success');
         },
-        onError: (err: any) => {
+        onError: (err) => {
           setIsResolveModalOpen(false);
-          showToast(err?.response?.data?.message || 'Resolution failed', 'danger');
+          showToast(err.response?.data?.message || 'Resolution failed', 'danger');
         },
       }
     );

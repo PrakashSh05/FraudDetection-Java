@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 interface CardProps {
   children: ReactNode;
@@ -8,13 +8,13 @@ interface CardProps {
   action?: ReactNode;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = ({
   children,
   className = '',
   title,
   subtitle,
   action,
-}) => {
+}: CardProps) => {
   return (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
       {(title || action) && (

@@ -1,11 +1,17 @@
-import React from 'react';
 import { useTopRules } from '../api/useDashboardData';
 import { DashboardWidget } from '../../../components/ui/DashboardWidget';
 import { SkeletonChart } from './SkeletonLoaders';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CHART_COLORS } from '../../../lib/chartColors';
 
-export const TopRulesWidget: React.FC = () => {
+interface TooltipPayload {
+  payload: {
+    percentage?: number;
+    ruleId?: string;
+  };
+}
+
+export const TopRulesWidget = () => {
   const { data, isLoading, isError, refetch } = useTopRules();
 
   return (
@@ -37,10 +43,13 @@ export const TopRulesWidget: React.FC = () => {
               width={120}
             />
             <Tooltip
-              formatter={(value: number, _name: string, props: any) => [
-                `${value} triggers (${props.payload.percentage ?? 0}%)`,
-                `Rule: ${props.payload.ruleId}`,
-              ]}
+              formatter={(value: number, _name: string, props: unknown) => {
+                const item = props as TooltipPayload;
+                return [
+                  `${value} triggers (${item.payload?.percentage ?? 0}%)`,
+                  `Rule: ${item.payload?.ruleId ?? 'N/A'}`,
+                ];
+              }}
               contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '12px' }}
             />
             <Bar dataKey="triggerCount" radius={[0, 4, 4, 0]}>

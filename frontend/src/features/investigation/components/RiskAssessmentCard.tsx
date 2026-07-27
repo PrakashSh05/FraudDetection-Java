@@ -1,4 +1,3 @@
-import React from 'react';
 import { RiskEvaluationDetails } from '../types';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -9,7 +8,7 @@ interface RiskAssessmentCardProps {
   evaluation: RiskEvaluationDetails;
 }
 
-export const RiskAssessmentCard: React.FC<RiskAssessmentCardProps> = ({ evaluation }) => {
+export const RiskAssessmentCard = ({ evaluation }: RiskAssessmentCardProps) => {
   return (
     <Card title="Risk Scoring Assessment" subtitle="Automated Strategy Pattern rule engine telemetry">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">

@@ -1,10 +1,9 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
 import { SearchCode } from 'lucide-react';
 
-export const InvestigationPlaceholder: React.FC = () => {
+export const InvestigationPlaceholder = () => {
   const { transactionId } = useParams<{ transactionId: string }>();
 
   return (

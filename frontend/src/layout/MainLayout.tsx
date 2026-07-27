@@ -1,9 +1,8 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 
-export const MainLayout: React.FC = () => {
+export const MainLayout = () => {
   return (
     <div className="min-h-screen bg-[#F6F7EB] flex">
       {/* Fixed Desktop Sidebar */}

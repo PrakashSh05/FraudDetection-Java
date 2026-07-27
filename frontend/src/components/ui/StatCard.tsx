@@ -1,4 +1,4 @@
-import React, { ReactNode, memo } from 'react';
+import { ReactNode, memo } from 'react';
 
 interface StatCardProps {
   title: string;
@@ -11,13 +11,13 @@ interface StatCardProps {
   subtitle?: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = memo(({
+export const StatCard = memo(({
   title,
   value,
   icon,
   trend,
   subtitle,
-}) => {
+}: StatCardProps) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 transition-all hover:shadow-md">
       <div className="flex items-center justify-between">
@@ -36,3 +36,5 @@ export const StatCard: React.FC<StatCardProps> = memo(({
     </div>
   );
 });
+
+StatCard.displayName = 'StatCard';

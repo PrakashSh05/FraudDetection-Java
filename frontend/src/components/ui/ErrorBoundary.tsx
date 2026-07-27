@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from './Button';
 import { AlertOctagon } from 'lucide-react';
 
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.state.error?.message || 'A rendering error occurred in this view.'}
           </p>
           <div className="mt-4">
-            <Button size="sm" variant="primary" onClick={handleReset}>
+            <Button size="sm" variant="primary" onClick={this.handleReset}>
               Reload Component
             </Button>
           </div>

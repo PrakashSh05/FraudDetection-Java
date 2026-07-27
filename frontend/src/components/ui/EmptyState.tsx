@@ -1,18 +1,18 @@
-import React from 'react';
+import { ReactNode } from 'react';
 
 interface EmptyStateProps {
   title: string;
   description: string;
-  action?: React.ReactNode;
-  icon?: React.ReactNode;
+  action?: ReactNode;
+  icon?: ReactNode;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export const EmptyState = ({
   title,
   description,
   action,
   icon,
-}) => {
+}: EmptyStateProps) => {
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-dashed border-gray-200">
       {icon ? (

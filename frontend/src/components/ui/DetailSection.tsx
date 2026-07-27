@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 interface DetailSectionProps {
   title: string;
@@ -8,13 +8,13 @@ interface DetailSectionProps {
   className?: string;
 }
 
-export const DetailSection: React.FC<DetailSectionProps> = ({
+export const DetailSection = ({
   title,
   subtitle,
   action,
   children,
   className = '',
-}) => {
+}: DetailSectionProps) => {
   return (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">

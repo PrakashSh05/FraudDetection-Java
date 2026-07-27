@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { CasesFilterParams } from '../types';
@@ -10,7 +10,7 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { Button } from '../../../components/ui/Button';
 import { ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export const CasesQueuePage: React.FC = () => {
+export const CasesQueuePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Read initial filters from URL params

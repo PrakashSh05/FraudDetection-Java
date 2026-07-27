@@ -1,4 +1,3 @@
-import React from 'react';
 import { useCaseTimeline } from '../api/useCaseDetailData';
 import { DetailSection } from '../../../components/ui/DetailSection';
 import { formatDate, formatRelativeTime } from '../../../utils/date';
@@ -8,7 +7,7 @@ interface AuditTimelinePanelProps {
   caseId: string;
 }
 
-export const AuditTimelinePanel: React.FC<AuditTimelinePanelProps> = ({ caseId }) => {
+export const AuditTimelinePanel = ({ caseId }: AuditTimelinePanelProps) => {
   const { data: timeline, isLoading, isError } = useCaseTimeline(caseId);
 
   const getEventIcon = (eventType: string) => {

@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { ArrowUpDown } from 'lucide-react';
 
 export interface Column<T> {

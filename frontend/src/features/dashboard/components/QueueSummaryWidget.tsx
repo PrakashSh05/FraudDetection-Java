@@ -1,10 +1,9 @@
-import React from 'react';
 import { useQueueSummary } from '../api/useDashboardData';
 import { DashboardWidget } from '../../../components/ui/DashboardWidget';
 import { Badge } from '../../../components/ui/Badge';
 import { SkeletonSummary } from './SkeletonLoaders';
 
-export const QueueSummaryWidget: React.FC = () => {
+export const QueueSummaryWidget = () => {
   const { data, isLoading, isError, refetch } = useQueueSummary();
 
   const items = data ? [
