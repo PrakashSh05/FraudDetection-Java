@@ -4,7 +4,6 @@ import com.fraudapi.config.FraudRuleProperties;
 import com.fraudapi.constants.RuleSeverity;
 import com.fraudapi.dto.TriggeredRule;
 import com.fraudapi.engine.rules.VelocityRule;
-import com.fraudapi.model.Transaction;
 import com.fraudapi.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,8 +35,6 @@ class VelocityRuleTest {
     @BeforeEach
     void setUp() {
         FraudRuleProperties properties = new FraudRuleProperties();
-        // FraudRuleProperties.Velocity uses maxTransactions (not maxTransactionsInWindow)
-        // and points (not riskPoints). There is no setSeverity field.
         properties.getVelocity().setMaxTransactions(3);
         properties.getVelocity().setWindowMinutes(5);
         properties.getVelocity().setPoints(25);
@@ -55,12 +50,9 @@ class VelocityRuleTest {
                 .amount(new BigDecimal("1000.00"))
                 .build();
 
-        Transaction t1 = Transaction.builder().id(101L).createdAt(LocalDateTime.now().minusMinutes(2)).build();
-        Transaction t2 = Transaction.builder().id(102L).createdAt(LocalDateTime.now().minusMinutes(1)).build();
-        Transaction t3 = Transaction.builder().id(103L).createdAt(LocalDateTime.now()).build();
-
-        when(transactionRepository.findByUserIdAndCreatedAtAfter(eq(1L), any()))
-                .thenReturn(List.of(t1, t2, t3));
+        // VelocityRule calls countRecentTransactions (not findByUserIdAndCreatedAtAfter)
+        when(transactionRepository.countRecentTransactions(eq(1L), any()))
+                .thenReturn(3L);
 
         Optional<TriggeredRule> result = velocityRule.evaluate(context);
 
@@ -81,10 +73,9 @@ class VelocityRuleTest {
                 .amount(new BigDecimal("1000.00"))
                 .build();
 
-        Transaction t1 = Transaction.builder().id(101L).createdAt(LocalDateTime.now().minusMinutes(2)).build();
-
-        when(transactionRepository.findByUserIdAndCreatedAtAfter(eq(1L), any()))
-                .thenReturn(List.of(t1));
+        // VelocityRule calls countRecentTransactions — returns 1 (under limit of 3)
+        when(transactionRepository.countRecentTransactions(eq(1L), any()))
+                .thenReturn(1L);
 
         Optional<TriggeredRule> result = velocityRule.evaluate(context);
 

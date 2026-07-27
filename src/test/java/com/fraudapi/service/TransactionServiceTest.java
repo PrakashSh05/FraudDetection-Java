@@ -139,7 +139,7 @@ class TransactionServiceTest {
         TransactionResponse response = transactionService.createTransaction(request);
 
         assertEquals(TransactionStatus.FLAGGED, response.getStatus());
-        assertTrue(response.getFraudReason().contains("exceeded"));
+        assertTrue(response.getFraudReason().contains("fraud indicator"));
         assertNull(response.getNewBalance());
         verify(transactionRiskEventRepository).saveAll(argThat(list -> ((List<?>) list).size() == 1));
         // Flagged transactions create an OPEN FraudCase
