@@ -61,7 +61,6 @@ public class TransactionService {
                 .userId(user.getId())
                 .amount(amount)
                 .transactionType(request.getTransactionType())
-                .userCurrentBalance(user.getBalance())
                 .build();
 
         // Step 3 — evaluate risk using rule engine
@@ -72,7 +71,7 @@ public class TransactionService {
         Transaction txn = Transaction.builder()
                 .user(user)
                 .amount(amount)
-                .transactionType(TransactionType.valueOf(request.getTransactionType()))
+                .transactionType(request.getTransactionType())
                 .riskScore(fraudDecision.getRiskScore())
                 .riskLevel(fraudDecision.getRiskLevel() != null ? fraudDecision.getRiskLevel().name() : "LOW")
                 .decision(decision != null ? decision.name() : "APPROVED")
@@ -177,6 +176,19 @@ public class TransactionService {
     }
 
     /**
+     * Returns all flagged transactions (status = FLAGGED), newest first.
+     * Used by the fraud admin monitoring endpoint.
+     */
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> getFlaggedTransactions() {
+        return transactionRepository
+                .findByStatusOrderByCreatedAtDesc(TransactionStatus.FLAGGED)
+                .stream()
+                .map(t -> toResponse(t, null, null))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Returns a single transaction by its ID.
      */
     @Transactional(readOnly = true)
@@ -191,7 +203,7 @@ public class TransactionService {
                 .id(txn.getId())
                 .userId(txn.getUser().getId())
                 .amount(txn.getAmount())
-                .transactionType(txn.getTransactionType().name())
+                .transactionType(txn.getTransactionType())
                 .status(txn.getStatus())
                 .fraudReason(fraudReason != null ? fraudReason : txn.getFraudReason())
                 .newBalance(newBalance)
