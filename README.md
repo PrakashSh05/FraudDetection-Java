@@ -443,9 +443,4 @@ The test suite validates:
 
 ---
 
-## 📄 License & Author
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
-
-* **Author**: Prakash Sharma
-* **GitHub**: [@PrakashSh05](https://github.com/PrakashSh05)
