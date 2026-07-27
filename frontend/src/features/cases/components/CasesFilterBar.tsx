@@ -18,13 +18,13 @@ export const CasesFilterBar = ({
   onSearchChange,
 }: CasesFilterBarProps) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 space-y-4">
+    <div className="bg-black border border-neutral-800 rounded-2xl p-4 mb-6 space-y-4 shadow-xl">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-semibold text-[#393E41]">
+        <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
           <Filter className="w-4 h-4 text-[#E94F37]" />
-          <span>Filter Queue</span>
+          <span>Queue Telemetry Filters</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={onReset} className="text-gray-500 hover:text-[#E94F37]">
+        <Button variant="ghost" size="sm" onClick={onReset} className="text-neutral-400 hover:text-white text-xs">
           <RotateCcw className="w-3.5 h-3.5 mr-1" />
           Reset Filters
         </Button>
@@ -33,13 +33,13 @@ export const CasesFilterBar = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {/* Search ID input */}
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search Case or Txn ID..."
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E94F37]"
+            className="w-full pl-8 pr-3 py-2 text-xs bg-neutral-950 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#E94F37]"
           />
         </div>
 
@@ -47,7 +47,7 @@ export const CasesFilterBar = ({
         <select
           value={filters.status || ''}
           onChange={(e) => onFilterChange({ status: e.target.value || undefined, page: 0 })}
-          className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-[#393E41] focus:outline-none focus:ring-1 focus:ring-[#E94F37]"
+          className="px-3 py-2 text-xs bg-neutral-950 border border-neutral-800 rounded-xl text-white focus:outline-none focus:border-[#E94F37]"
         >
           <option value="">All Statuses</option>
           <option value="OPEN">OPEN</option>
@@ -63,7 +63,7 @@ export const CasesFilterBar = ({
         <select
           value={filters.priority || ''}
           onChange={(e) => onFilterChange({ priority: e.target.value || undefined, page: 0 })}
-          className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-[#393E41] focus:outline-none focus:ring-1 focus:ring-[#E94F37]"
+          className="px-3 py-2 text-xs bg-neutral-950 border border-neutral-800 rounded-xl text-white focus:outline-none focus:border-[#E94F37]"
         >
           <option value="">All Priorities</option>
           <option value="CRITICAL">CRITICAL</option>
@@ -76,7 +76,7 @@ export const CasesFilterBar = ({
         <select
           value={filters.riskLevel || ''}
           onChange={(e) => onFilterChange({ riskLevel: e.target.value || undefined, page: 0 })}
-          className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-[#393E41] focus:outline-none focus:ring-1 focus:ring-[#E94F37]"
+          className="px-3 py-2 text-xs bg-neutral-950 border border-neutral-800 rounded-xl text-white focus:outline-none focus:border-[#E94F37]"
         >
           <option value="">All Risk Levels</option>
           <option value="CRITICAL">CRITICAL</option>
@@ -91,7 +91,7 @@ export const CasesFilterBar = ({
           placeholder="Filter Analyst..."
           value={filters.assignedTo || ''}
           onChange={(e) => onFilterChange({ assignedTo: e.target.value || undefined, page: 0 })}
-          className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-[#393E41] focus:outline-none focus:ring-1 focus:ring-[#E94F37]"
+          className="px-3 py-2 text-xs bg-neutral-950 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#E94F37]"
         />
       </div>
     </div>

@@ -23,15 +23,15 @@ export const KeyValueGrid = ({ items, cols = 2 }: KeyValueGridProps) => {
       {items.map((item, idx) => (
         <div
           key={idx}
-          className={`p-3 bg-gray-50 rounded-lg border border-gray-100 ${
+          className={`p-3.5 bg-neutral-950 rounded-xl border border-neutral-800 ${
             item.fullWidth ? 'col-span-full' : ''
           }`}
         >
-          <span className="text-gray-400 block text-[10px] uppercase font-semibold tracking-wider">
+          <span className="text-neutral-400 block text-[10px] uppercase font-bold tracking-wider">
             {item.label}
           </span>
-          <div className="font-semibold text-[#393E41] mt-1 break-words">
-            {item.value ?? <span className="text-gray-300 italic">N/A</span>}
+          <div className="font-bold text-white mt-1 break-words">
+            {item.value ?? <span className="text-neutral-500 italic">N/A</span>}
           </div>
         </div>
       ))}

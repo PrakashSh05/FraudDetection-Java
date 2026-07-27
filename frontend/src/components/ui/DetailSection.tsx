@@ -16,11 +16,11 @@ export const DetailSection = ({
   className = '',
 }: DetailSectionProps) => {
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+    <div className={`bg-black border border-neutral-800 rounded-2xl p-6 shadow-2xl ${className}`}>
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-800">
         <div>
-          <h3 className="text-base font-bold text-[#393E41] tracking-tight">{title}</h3>
-          {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
+          <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
+          {subtitle && <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>}
         </div>
         {action && <div>{action}</div>}
       </div>

@@ -15,23 +15,23 @@ export const AuditTimelinePanel = ({ caseId }: AuditTimelinePanelProps) => {
       case 'CASE_CREATED':
         return <Shield className="w-4 h-4 text-[#E94F37]" />;
       case 'CASE_ASSIGNED':
-        return <UserCheck className="w-4 h-4 text-[#3B82F6]" />;
+        return <UserCheck className="w-4 h-4 text-orange-400" />;
       case 'STATUS_CHANGED':
-        return <RefreshCw className="w-4 h-4 text-[#F59E0B]" />;
+        return <RefreshCw className="w-4 h-4 text-amber-400" />;
       case 'NOTES_UPDATED':
-        return <FileText className="w-4 h-4 text-purple-600" />;
+        return <FileText className="w-4 h-4 text-orange-400" />;
       case 'CASE_RESOLVED':
       case 'CASE_CLOSED':
-        return <CheckCircle2 className="w-4 h-4 text-[#10B981]" />;
+        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
       default:
-        return <History className="w-4 h-4 text-gray-500" />;
+        return <History className="w-4 h-4 text-neutral-400" />;
     }
   };
 
   if (isLoading) {
     return (
       <DetailSection title="Compliance Audit Timeline">
-        <div className="p-8 text-center animate-pulse text-xs text-gray-400">Loading timeline...</div>
+        <div className="p-8 text-center animate-pulse text-xs text-neutral-400">Loading timeline...</div>
       </DetailSection>
     );
   }
@@ -39,7 +39,7 @@ export const AuditTimelinePanel = ({ caseId }: AuditTimelinePanelProps) => {
   if (isError || !timeline || timeline.length === 0) {
     return (
       <DetailSection title="Compliance Audit Timeline">
-        <div className="p-8 text-center text-xs text-gray-400">No audit records found for this case.</div>
+        <div className="p-8 text-center text-xs text-neutral-500">No audit records found for this case.</div>
       </DetailSection>
     );
   }
@@ -47,27 +47,27 @@ export const AuditTimelinePanel = ({ caseId }: AuditTimelinePanelProps) => {
   return (
     <DetailSection
       title="Compliance Audit Timeline"
-      subtitle="Immutable audit trail of all actions performed"
+      subtitle="Immutable audit trail of all compliance operations"
     >
-      <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+      <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-neutral-800">
         {timeline.map((event) => (
           <div key={event.id} className="relative flex items-start gap-3 text-xs">
-            <div className="absolute -left-[27px] top-0.5 p-1 bg-white border border-gray-200 rounded-full shadow-2xs">
+            <div className="absolute -left-[27px] top-0.5 p-1 bg-neutral-950 border border-neutral-800 rounded-full shadow-lg">
               {getEventIcon(event.eventType)}
             </div>
-            <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <div className="flex items-center justify-between font-semibold text-[#393E41]">
+            <div className="flex-1 bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
+              <div className="flex items-center justify-between font-bold text-white">
                 <span>{event.eventType.replace('_', ' ')}</span>
-                <span className="text-[10px] text-gray-400 font-normal">{formatRelativeTime(event.timestamp)}</span>
+                <span className="text-[10px] text-neutral-500 font-normal">{formatRelativeTime(event.timestamp)}</span>
               </div>
               {(event.oldValue || event.newValue) && (
-                <p className="text-gray-600 mt-1">
-                  {event.oldValue && <span className="line-through text-gray-400 mr-1.5">{event.oldValue}</span>}
-                  {event.newValue && <span className="font-semibold text-[#393E41]">{event.newValue}</span>}
+                <p className="text-neutral-300 mt-1.5">
+                  {event.oldValue && <span className="line-through text-neutral-500 mr-1.5">{event.oldValue}</span>}
+                  {event.newValue && <span className="font-bold text-[#E94F37]">{event.newValue}</span>}
                 </p>
               )}
-              <div className="mt-1 text-[10px] text-gray-400 flex items-center justify-between">
-                <span>By: {event.performedBy}</span>
+              <div className="mt-2 pt-2 border-t border-neutral-800 text-[10px] text-neutral-400 flex items-center justify-between">
+                <span>By: <strong className="text-[#E94F37]">{event.performedBy}</strong></span>
                 <span>{formatDate(event.timestamp)}</span>
               </div>
             </div>

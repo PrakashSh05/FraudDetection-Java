@@ -42,7 +42,7 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
       { caseId: caseDetail.caseId, assignedTo: assignedToInput.trim() },
       {
         onSuccess: () => showToast('Analyst assigned successfully', 'success'),
-        onError: (err) => showToast(err.response?.data?.message || 'Assignment failed', 'danger'),
+        onError: (err: any) => showToast(err.response?.data?.message || 'Assignment failed', 'danger'),
       }
     );
   };
@@ -52,7 +52,7 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
       { caseId: caseDetail.caseId, status: statusSelect },
       {
         onSuccess: () => showToast(`Status updated to ${statusSelect}`, 'success'),
-        onError: (err) => showToast(err.response?.data?.message || 'Status transition failed', 'danger'),
+        onError: (err: any) => showToast(err.response?.data?.message || 'Status transition failed', 'danger'),
       }
     );
   };
@@ -63,7 +63,7 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
       { caseId: caseDetail.caseId, reviewNotes: notesInput.trim() },
       {
         onSuccess: () => showToast('Review notes updated successfully', 'success'),
-        onError: (err) => showToast(err.response?.data?.message || 'Failed to update notes', 'danger'),
+        onError: (err: any) => showToast(err.response?.data?.message || 'Failed to update notes', 'danger'),
       }
     );
   };
@@ -77,43 +77,39 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
           setIsResolveModalOpen(false);
           showToast(`Case finalized with ${resolveStatusSelect}`, 'success');
         },
-        onError: (err) => {
-          setIsResolveModalOpen(false);
-          showToast(err.response?.data?.message || 'Resolution failed', 'danger');
-        },
+        onError: (err: any) => showToast(err.response?.data?.message || 'Case resolution failed', 'danger'),
       }
     );
   };
 
   return (
     <DetailSection
-      title="Analyst Review Workflow"
-      subtitle={isClosed ? 'Case is CLOSED — actions disabled' : 'Execute manual review workflow actions'}
-      action={
-        isClosed ? (
-          <span className="inline-flex items-center gap-1 text-xs text-gray-400 font-semibold bg-gray-100 px-2.5 py-1 rounded-md">
-            <Lock className="w-3 h-3" /> Immutable
-          </span>
-        ) : undefined
-      }
+      title="Analyst Action Panel"
+      subtitle="Lifecycle status transitions, analyst assignment, notes, and case resolution"
     >
-      <div className="space-y-6">
+      {isClosed && (
+        <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>Case is CLOSED. Workflow actions are locked for editing.</span>
+        </div>
+      )}
+
+      <div className="space-y-4">
         {/* Action 1: Assign Analyst */}
-        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
-          <label htmlFor="assign-analyst-input" className="flex items-center gap-2 text-xs font-bold text-[#393E41]">
-            <UserCheck className="w-4 h-4 text-[#3B82F6]" />
-            <span>Assign Analyst</span>
-          </label>
+        <div className="p-4 bg-neutral-950 rounded-xl border border-neutral-800 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-white">
+            <UserCheck className="w-4 h-4 text-[#E94F37]" />
+            <span>Assign Case to Analyst</span>
+          </div>
           <div className="flex gap-2">
             <input
-              id="assign-analyst-input"
               type="text"
               placeholder="Analyst username..."
               value={assignedToInput}
               onChange={(e) => setAssignedToInput(e.target.value)}
               disabled={isClosed}
-              aria-label="Assign Analyst Username"
-              className="flex-1 px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E94F37] disabled:bg-gray-100"
+              aria-label="Analyst username"
+              className="flex-1 px-3 py-1.5 text-xs bg-black border border-neutral-800 rounded-lg text-white focus:outline-none focus:border-[#E94F37] disabled:bg-neutral-950"
             />
             <Button
               size="sm"
@@ -127,20 +123,19 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
           </div>
         </div>
 
-        {/* Action 2: Update Workflow Status */}
-        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
-          <label htmlFor="status-select-input" className="flex items-center gap-2 text-xs font-bold text-[#393E41]">
-            <RefreshCw className="w-4 h-4 text-[#F59E0B]" />
-            <span>Update Workflow Status</span>
-          </label>
+        {/* Action 2: Update Case Lifecycle Status */}
+        <div className="p-4 bg-neutral-950 rounded-xl border border-neutral-800 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-white">
+            <RefreshCw className="w-4 h-4 text-orange-400" />
+            <span>Transition Status</span>
+          </div>
           <div className="flex gap-2">
             <select
-              id="status-select-input"
               value={statusSelect}
               onChange={(e) => setStatusSelect(e.target.value)}
               disabled={isClosed}
-              aria-label="Select Workflow Status"
-              className="flex-1 px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E94F37] disabled:bg-gray-100"
+              aria-label="Transition Status"
+              className="flex-1 px-3 py-1.5 text-xs bg-black border border-neutral-800 rounded-lg text-white focus:outline-none focus:border-[#E94F37] disabled:bg-neutral-950"
             >
               <option value="OPEN">OPEN</option>
               <option value="ASSIGNED">ASSIGNED</option>
@@ -161,22 +156,21 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
           </div>
         </div>
 
-        {/* Action 3: Analyst Review Notes */}
-        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
-          <label htmlFor="notes-textarea" className="flex items-center gap-2 text-xs font-bold text-[#393E41]">
-            <FileText className="w-4 h-4 text-purple-600" />
-            <span>Analyst Review Notes</span>
-          </label>
+        {/* Action 3: Review Notes */}
+        <div className="p-4 bg-neutral-950 rounded-xl border border-neutral-800 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-white">
+            <FileText className="w-4 h-4 text-orange-400" />
+            <span>Record Investigation Notes</span>
+          </div>
           <textarea
-            id="notes-textarea"
             rows={3}
             placeholder="Record internal investigation findings..."
             value={notesInput}
             onChange={(e) => setNotesInput(e.target.value)}
             disabled={isClosed}
-            aria-label="Analyst Review Notes Input"
-            className="w-full p-3 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E94F37] disabled:bg-gray-100"
-          />
+            aria-label="Record internal investigation findings"
+            className="w-full px-3 py-2 text-xs bg-black border border-neutral-800 rounded-lg text-white focus:outline-none focus:border-[#E94F37] disabled:bg-neutral-950"
+          ></textarea>
           <div className="flex justify-end">
             <Button
               size="sm"
@@ -191,8 +185,8 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
         </div>
 
         {/* Action 4: Resolve & Finalize Case */}
-        <div className="p-4 bg-rose-50/50 rounded-xl border border-rose-100 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#E94F37]">
+        <div className="p-4 bg-neutral-950 rounded-xl border border-orange-500/30 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-orange-400">
             <CheckCircle2 className="w-4 h-4" />
             <span>Resolve & Finalize Case</span>
           </div>
@@ -202,7 +196,7 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
               onChange={(e) => setResolveStatusSelect(e.target.value)}
               disabled={isClosed}
               aria-label="Select Resolution Decision"
-              className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E94F37] disabled:bg-gray-100"
+              className="w-full px-3 py-1.5 text-xs bg-black border border-neutral-800 rounded-lg text-white focus:outline-none focus:border-[#E94F37] disabled:bg-neutral-950"
             >
               <option value="APPROVED">APPROVED (Clear Transaction)</option>
               <option value="DECLINED">DECLINED (Confirm Fraud)</option>
@@ -215,7 +209,7 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
               onChange={(e) => setResolutionInput(e.target.value)}
               disabled={isClosed}
               aria-label="Resolution Outcome Summary"
-              className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E94F37] disabled:bg-gray-100"
+              className="w-full px-3 py-1.5 text-xs bg-black border border-neutral-800 rounded-lg text-white focus:outline-none focus:border-[#E94F37] disabled:bg-neutral-950"
             />
           </div>
           <Button
@@ -230,7 +224,7 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
         </div>
       </div>
 
-      {/* Reusable Generic ConfirmationDialog */}
+      {/* ConfirmationDialog */}
       <ConfirmationDialog
         isOpen={isResolveModalOpen}
         onClose={() => setIsResolveModalOpen(false)}
@@ -241,8 +235,8 @@ export const WorkflowActionsPanel = ({ caseDetail }: WorkflowActionsPanelProps) 
         variant="primary"
         isLoading={resolveMutation.isPending}
       >
-        <div className="p-3 bg-gray-50 rounded-lg text-xs font-mono text-gray-700 border border-gray-100">
-          <span className="text-[10px] text-gray-400 block uppercase font-semibold">Resolution Summary</span>
+        <div className="p-3 bg-neutral-950 rounded-lg text-xs font-mono text-neutral-300 border border-neutral-800">
+          <span className="text-[10px] text-neutral-500 block uppercase font-bold">Resolution Summary</span>
           "{resolutionInput}"
         </div>
       </ConfirmationDialog>

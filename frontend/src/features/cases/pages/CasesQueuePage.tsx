@@ -8,10 +8,14 @@ import { CasesTable } from '../components/CasesTable';
 import { SkeletonTable } from '../components/SkeletonTable';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { Button } from '../../../components/ui/Button';
-import { ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShieldAlert, ChevronLeft, ChevronRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export const CasesQueuePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Tab state: 'active' vs 'approved'
+  const initialTab = searchParams.get('tab') || 'active';
+  const [activeTab, setActiveTab] = useState<'active' | 'approved'>(initialTab as 'active' | 'approved');
 
   // Read initial filters from URL params
   const initialStatus = searchParams.get('status') || undefined;
@@ -51,6 +55,7 @@ export const CasesQueuePage = () => {
   // Sync state changes back to URL search params
   useEffect(() => {
     const params: Record<string, string> = {};
+    params.tab = activeTab;
     if (filters.status) params.status = filters.status;
     if (filters.priority) params.priority = filters.priority;
     if (filters.riskLevel) params.riskLevel = filters.riskLevel;
@@ -60,9 +65,14 @@ export const CasesQueuePage = () => {
     if (filters.sort) params.sort = filters.sort;
 
     setSearchParams(params, { replace: true });
-  }, [filters, searchValue, setSearchParams]);
+  }, [filters, searchValue, activeTab, setSearchParams]);
 
-  const { data, isLoading, isError, refetch } = useFraudCasesQueue(filters);
+  const activeFilters = {
+    ...filters,
+    status: activeTab === 'approved' ? (filters.status || 'APPROVED') : filters.status,
+  };
+
+  const { data, isLoading, isError, refetch } = useFraudCasesQueue(activeFilters);
 
   const handleFilterChange = (newFilters: Partial<CasesFilterParams>) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: newFilters.page ?? 0 }));
@@ -80,18 +90,65 @@ export const CasesQueuePage = () => {
     setFilters((prev) => ({ ...prev, sort: `${sortField},${newDir}`, page: 0 }));
   };
 
+  const handleTabSwitch = (tab: 'active' | 'approved') => {
+    setActiveTab(tab);
+    setFilters((prev) => ({
+      ...prev,
+      status: tab === 'approved' ? 'APPROVED' : undefined,
+      page: 0,
+    }));
+  };
+
   const totalPages = data?.totalPages ?? 0;
   const currentPage = data?.number ?? 0;
-  const cases = data?.content ?? [];
+  
+  // Filter cases: In Active Queue tab, keep OPEN, ASSIGNED, UNDER_REVIEW, ESCALATED, DECLINED, CLOSED. Only APPROVED moves to Approved Archive!
+  const allCases = data?.content ?? [];
+  const cases = activeTab === 'active' && !filters.status
+    ? allCases.filter((c) => c.status !== 'APPROVED')
+    : allCases;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Fraud Case Queue"
+        title="Fraud Case Queue & Audit Portal"
         subtitle="Operational workspace for compliance analysts to inspect, review, and resolve high-risk fraud cases"
       />
 
-      {/* Filter Bar with URL search params & 300ms debounced search */}
+      {/* Primary Sub-Navigation Tabs */}
+      <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => handleTabSwitch('active')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all ${
+              activeTab === 'active'
+                ? 'bg-[#E94F37] text-white shadow-lg shadow-[#E94F37]/30 border border-[#E94F37]'
+                : 'bg-neutral-950 text-neutral-400 hover:text-white border border-neutral-800'
+            }`}
+          >
+            <ShieldAlert className="w-4 h-4" />
+            <span>Active Cases Queue</span>
+          </button>
+
+          <button
+            onClick={() => handleTabSwitch('approved')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all ${
+              activeTab === 'approved'
+                ? 'bg-[#E94F37] text-white shadow-lg shadow-[#E94F37]/30 border border-[#E94F37]'
+                : 'bg-neutral-950 text-neutral-400 hover:text-white border border-neutral-800'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Approved & Finalized Archive</span>
+          </button>
+        </div>
+
+        <div className="text-xs font-bold text-neutral-400">
+          {activeTab === 'active' ? 'Active Operational Queue' : 'Approved Cases Archive'}
+        </div>
+      </div>
+
+      {/* Filter Bar */}
       <CasesFilterBar
         filters={filters}
         onFilterChange={handleFilterChange}
@@ -104,9 +161,9 @@ export const CasesQueuePage = () => {
       {isLoading ? (
         <SkeletonTable />
       ) : isError ? (
-        <div className="p-8 text-center bg-rose-50 border border-rose-200 rounded-xl">
-          <ShieldAlert className="w-8 h-8 text-[#EF4444] mx-auto mb-2" />
-          <p className="text-sm font-semibold text-[#EF4444]">Failed to load fraud cases queue</p>
+        <div className="p-8 text-center bg-neutral-950 border border-[#E94F37] rounded-2xl">
+          <ShieldAlert className="w-8 h-8 text-[#E94F37] mx-auto mb-2" />
+          <p className="text-sm font-bold text-orange-400">Failed to load fraud cases queue</p>
           <div className="mt-3">
             <Button size="sm" variant="outline" onClick={() => refetch()}>
               Retry Connection
@@ -115,9 +172,13 @@ export const CasesQueuePage = () => {
         </div>
       ) : cases.length === 0 ? (
         <EmptyState
-          icon={<ShieldAlert className="w-8 h-8" />}
-          title="No Fraud Cases Found"
-          description="No cases match your active filter criteria or search ID. Try adjusting your status or search terms."
+          icon={activeTab === 'active' ? <ShieldAlert className="w-8 h-8 text-orange-500" /> : <CheckCircle2 className="w-8 h-8 text-orange-500" />}
+          title={activeTab === 'active' ? "No Active Queue Cases" : "No Approved Cases in Archive"}
+          description={
+            activeTab === 'active'
+              ? "All flagged cases have been resolved, or no active cases match your current filter parameters."
+              : "No approved or finalized cases found matching your active filter criteria."
+          }
           action={
             <Button size="sm" variant="outline" onClick={handleResetFilters}>
               Clear Filters
@@ -129,16 +190,16 @@ export const CasesQueuePage = () => {
           <CasesTable cases={cases} sortParam={filters.sort} onSortChange={handleSortToggle} />
 
           {/* Pagination Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-xs text-gray-500">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-neutral-950 p-4 rounded-2xl border border-neutral-800 shadow-lg text-xs text-neutral-400">
             <div>
-              Showing <span className="font-semibold text-[#393E41]">{cases.length}</span> of{' '}
-              <span className="font-semibold text-[#393E41]">{data?.totalElements ?? 0}</span> fraud cases
+              Showing <span className="font-bold text-white">{cases.length}</span> of{' '}
+              <span className="font-bold text-white">{data?.totalElements ?? 0}</span> {activeTab === 'active' ? 'active' : 'approved'} cases
             </div>
 
             <div className="flex items-center gap-2">
               <span className="mr-2">
-                Page <span className="font-semibold text-[#393E41]">{currentPage + 1}</span> of{' '}
-                <span className="font-semibold text-[#393E41]">{totalPages}</span>
+                Page <span className="font-bold text-white">{currentPage + 1}</span> of{' '}
+                <span className="font-bold text-white">{totalPages || 1}</span>
               </span>
 
               <Button

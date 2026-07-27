@@ -22,9 +22,9 @@ export const CaseDetailPage = () => {
     return (
       <div className="space-y-6">
         <PageHeader title={`Fraud Case #${id}`} />
-        <div className="p-8 text-center bg-rose-50 border border-rose-200 rounded-xl">
-          <ShieldAlert className="w-8 h-8 text-[#EF4444] mx-auto mb-2" />
-          <p className="text-sm font-semibold text-[#EF4444]">
+        <div className="p-8 text-center bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+          <ShieldAlert className="w-8 h-8 text-rose-400 mx-auto mb-2" />
+          <p className="text-sm font-semibold text-rose-300">
             Failed to load details for Fraud Case #{id}
           </p>
           <div className="mt-4 flex justify-center gap-3">

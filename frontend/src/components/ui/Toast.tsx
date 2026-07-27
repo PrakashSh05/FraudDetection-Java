@@ -42,28 +42,28 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const getToastIcon = (variant: ToastVariant) => {
     switch (variant) {
       case 'success':
-        return <CheckCircle2 className="w-4 h-4 text-[#10B981]" />;
+        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
       case 'danger':
-        return <XCircle className="w-4 h-4 text-[#EF4444]" />;
+        return <XCircle className="w-4 h-4 text-rose-400" />;
       case 'warning':
-        return <AlertTriangle className="w-4 h-4 text-[#F59E0B]" />;
+        return <AlertTriangle className="w-4 h-4 text-amber-400" />;
       case 'info':
       default:
-        return <Info className="w-4 h-4 text-[#3B82F6]" />;
+        return <Info className="w-4 h-4 text-blue-400" />;
     }
   };
 
   const getToastStyles = (variant: ToastVariant) => {
     switch (variant) {
       case 'success':
-        return 'bg-emerald-50 border-emerald-200 text-emerald-900';
+        return 'bg-slate-900/95 border-emerald-500/40 text-emerald-300 shadow-emerald-500/10';
       case 'danger':
-        return 'bg-rose-50 border-rose-200 text-rose-900';
+        return 'bg-slate-900/95 border-rose-500/40 text-rose-300 shadow-rose-500/10';
       case 'warning':
-        return 'bg-amber-50 border-amber-200 text-amber-900';
+        return 'bg-slate-900/95 border-amber-500/40 text-amber-300 shadow-amber-500/10';
       case 'info':
       default:
-        return 'bg-blue-50 border-blue-200 text-blue-900';
+        return 'bg-slate-900/95 border-blue-500/40 text-blue-300 shadow-blue-500/10';
     }
   };
 
@@ -80,17 +80,17 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           <div
             key={toast.id}
             role="alert"
-            className={`pointer-events-auto flex items-center justify-between p-3.5 rounded-xl border shadow-md transition-all animate-in slide-in-from-bottom-2 duration-200 ${getToastStyles(
+            className={`pointer-events-auto flex items-center justify-between p-3.5 rounded-2xl border shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-2 duration-200 ${getToastStyles(
               toast.variant
             )}`}
           >
-            <div className="flex items-center gap-2.5 text-xs font-medium pr-2">
+            <div className="flex items-center gap-2.5 text-xs font-semibold pr-2">
               {getToastIcon(toast.variant)}
               <span>{toast.message}</span>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="p-1 text-gray-400 hover:text-gray-700 rounded-md transition-colors"
+              className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
               aria-label="Close notification"
             >
               <X className="w-3.5 h-3.5" />

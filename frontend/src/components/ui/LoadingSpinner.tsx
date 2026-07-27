@@ -14,9 +14,9 @@ export const LoadingSpinner = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+    <div className="flex flex-col items-center justify-center p-8 text-slate-400">
       <div className={`animate-spin rounded-full border-[#E94F37] border-t-transparent ${sizeClasses[size]}`}></div>
-      {label && <p className="mt-3 text-sm font-medium">{label}</p>}
+      {label && <p className="mt-3 text-xs font-semibold text-slate-300">{label}</p>}
     </div>
   );
 };

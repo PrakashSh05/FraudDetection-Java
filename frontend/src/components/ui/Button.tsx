@@ -15,14 +15,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   disabled,
   ...props
 }, ref) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95';
 
   const variantStyles = {
-    primary: 'bg-[#E94F37] text-white hover:bg-[#d4432c] focus:ring-[#E94F37]',
-    secondary: 'bg-[#393E41] text-white hover:bg-[#2b2f31] focus:ring-[#393E41]',
-    outline: 'border border-gray-300 bg-white text-[#393E41] hover:bg-gray-50 focus:ring-[#E94F37]',
-    danger: 'bg-[#EF4444] text-white hover:bg-[#dc2626] focus:ring-[#EF4444]',
-    ghost: 'text-[#393E41] hover:bg-gray-100 focus:ring-gray-300',
+    primary: 'bg-[#E94F37] hover:bg-[#D03E27] text-white shadow-lg shadow-[#E94F37]/30 border border-[#E94F37]',
+    secondary: 'bg-neutral-900 text-orange-400 hover:bg-neutral-800 border border-orange-500/30',
+    outline: 'border border-neutral-800 bg-black text-slate-300 hover:bg-neutral-900 hover:text-white hover:border-orange-500/50',
+    danger: 'bg-neutral-900 text-orange-400 border border-orange-500/40 hover:bg-[#E94F37] hover:text-white',
+    ghost: 'text-neutral-400 hover:text-orange-400 hover:bg-neutral-900',
   };
 
   const sizeStyles = {

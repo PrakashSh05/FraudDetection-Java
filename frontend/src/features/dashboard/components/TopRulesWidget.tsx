@@ -2,7 +2,6 @@ import { useTopRules } from '../api/useDashboardData';
 import { DashboardWidget } from '../../../components/ui/DashboardWidget';
 import { SkeletonChart } from './SkeletonLoaders';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { CHART_COLORS } from '../../../lib/chartColors';
 
 interface TooltipPayload {
   payload: {
@@ -33,28 +32,37 @@ export const TopRulesWidget = () => {
             data={data || []}
             margin={{ top: 10, right: 20, left: 40, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F3F4F6" />
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#6C757D' }} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#262626" />
+            <XAxis type="number" tick={{ fontSize: 11, fill: '#A1A1AA' }} axisLine={false} />
             <YAxis
               dataKey="ruleName"
               type="category"
-              tick={{ fontSize: 11, fill: '#393E41', fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: '#FFFFFF', fontWeight: 600 }}
               axisLine={false}
-              width={120}
+              width={130}
             />
             <Tooltip
               formatter={(value: number, _name: string, props: unknown) => {
                 const item = props as TooltipPayload;
                 return [
-                  `${value} triggers (${item.payload?.percentage ?? 0}%)`,
+                  `${value} triggers`,
                   `Rule: ${item.payload?.ruleId ?? 'N/A'}`,
                 ];
               }}
-              contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '12px' }}
+              contentStyle={{
+                backgroundColor: '#0A0A0A',
+                borderRadius: '12px',
+                borderColor: '#E94F37',
+                color: '#FFFFFF',
+                fontSize: '12px',
+                boxShadow: '0 10px 25px -5px rgba(233, 79, 55, 0.3)',
+              }}
+              itemStyle={{ color: '#FFFFFF', fontWeight: 'bold' }}
+              labelStyle={{ color: '#FFFFFF', fontWeight: 'bold' }}
             />
-            <Bar dataKey="triggerCount" radius={[0, 4, 4, 0]}>
+            <Bar dataKey="triggerCount" radius={[0, 8, 8, 0]}>
               {(data || []).map((_, index) => (
-                <Cell key={`cell-${index}`} fill={index === 0 ? CHART_COLORS.primary : CHART_COLORS.dark} />
+                <Cell key={`cell-${index}`} fill={index === 0 ? '#E94F37' : '#F97316'} />
               ))}
             </Bar>
           </BarChart>

@@ -1,18 +1,11 @@
 package com.fraudapi.service;
 
-import com.fraudapi.constants.Decision;
-import com.fraudapi.constants.FraudCaseAuditEventType;
-import com.fraudapi.constants.FraudCasePriority;
-import com.fraudapi.constants.FraudCaseStatus;
-import com.fraudapi.constants.TransactionStatus;
-import com.fraudapi.constants.TransactionType;
+import com.fraudapi.constants.*;
 import com.fraudapi.dto.FraudDecision;
 import com.fraudapi.dto.TransactionRequest;
 import com.fraudapi.dto.TransactionResponse;
-import com.fraudapi.dto.TriggeredRule;
 import com.fraudapi.engine.TransactionContext;
 import com.fraudapi.exception.InsufficientBalanceException;
-import com.fraudapi.exception.TransactionNotFoundException;
 import com.fraudapi.exception.UserNotFoundException;
 import com.fraudapi.model.FraudCase;
 import com.fraudapi.model.Transaction;
@@ -25,7 +18,6 @@ import com.fraudapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -34,88 +26,78 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Core business logic for transaction processing integrated with {@link TransactionRiskService},
- * persistent risk telemetry, and automated fraud case generation with audit logging.
+ * Core business service orchestrating financial transaction processing,
+ * rule engine risk evaluation, persistence of risk events, balance adjustments,
+ * and automated case creation.
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionService {
 
-    private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
     private final TransactionRiskEventRepository transactionRiskEventRepository;
+    private final TransactionRiskService transactionRiskService;
     private final FraudCaseRepository fraudCaseRepository;
     private final FraudCaseAuditService fraudCaseAuditService;
-    private final TransactionRiskService transactionRiskService;
 
     /**
-     * Creates a transaction after performing risk evaluation and balance validation.
-     *
-     * @param request the transaction payload
-     * @return the persisted transaction as a response DTO
-     * @throws UserNotFoundException        if the user ID is not found
-     * @throws InsufficientBalanceException if DEBIT amount exceeds current balance
+     * Creates and processes a financial transaction.
      */
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional
     public TransactionResponse createTransaction(TransactionRequest request) {
-        log.info("Processing transaction for userId={} type={} amount={}",
+        log.info("Processing transaction request for userId={} type={} amount={}",
                 request.getUserId(), request.getTransactionType(), request.getAmount());
 
-        // Step 1 — load user
+        // Step 1 — validate user existence
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
 
         BigDecimal amount = request.getAmount();
 
-        // Step 2 — build transaction context & perform risk evaluation
+        // Step 2 — construct evaluation context
         TransactionContext context = TransactionContext.builder()
-                .user(user)
                 .userId(user.getId())
                 .amount(amount)
                 .transactionType(request.getTransactionType())
+                .userCurrentBalance(user.getBalance())
                 .build();
 
+        // Step 3 — evaluate risk using rule engine
         FraudDecision fraudDecision = transactionRiskService.evaluateTransactionRisk(context);
+        Decision decision = fraudDecision.getDecision();
 
-        log.info("Risk telemetry for userId={}: score={}, level={}, decision={}, triggeredRules={}, duration={}ms",
-                user.getId(), fraudDecision.getRiskScore(), fraudDecision.getRiskLevel(),
-                fraudDecision.getDecision(),
-                fraudDecision.getTriggeredRules() != null ? fraudDecision.getTriggeredRules().size() : 0,
-                fraudDecision.getProcessingTimeMs());
-
-        // Step 3 — build transaction entity including risk evaluation fields
+        // Step 4 — construct base transaction record
         Transaction txn = Transaction.builder()
                 .user(user)
                 .amount(amount)
-                .transactionType(request.getTransactionType())
+                .transactionType(TransactionType.valueOf(request.getTransactionType()))
                 .riskScore(fraudDecision.getRiskScore())
-                .riskLevel(fraudDecision.getRiskLevel() != null ? fraudDecision.getRiskLevel().name() : null)
-                .decision(fraudDecision.getDecision() != null ? fraudDecision.getDecision().name() : null)
+                .riskLevel(fraudDecision.getRiskLevel() != null ? fraudDecision.getRiskLevel().name() : "LOW")
+                .decision(decision != null ? decision.name() : "APPROVED")
                 .processingTimeMs(fraudDecision.getProcessingTimeMs())
                 .evaluationTimestamp(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         BigDecimal balanceAfter = user.getBalance();
         String fraudReason = null;
 
-        Decision decision = fraudDecision.getDecision();
-
-        if (Decision.REJECTED.equals(decision) || Decision.REVIEW.equals(decision)) {
-            // Step 4 — REJECTED / REVIEW: flag transaction without modifying balance
+        // Step 5 — process decision branches
+        if (Decision.REJECTED.equals(decision)) {
             txn.setStatus(TransactionStatus.FLAGGED);
-            if (fraudDecision.getTriggeredRules() != null && !fraudDecision.getTriggeredRules().isEmpty()) {
-                fraudReason = fraudDecision.getTriggeredRules().stream()
-                        .map(TriggeredRule::getDescription)
-                        .collect(Collectors.joining("; "));
-            } else {
-                fraudReason = fraudDecision.getSummary();
-            }
+            fraudReason = "Transaction blocked by rule engine due to high-risk evaluation. Reason: "
+                    + fraudDecision.getSummary();
             txn.setFraudReason(fraudReason);
-            log.warn("Transaction FLAGGED for userId={} decision={} reason='{}'", user.getId(), decision, fraudReason);
-
+            log.warn("Transaction REJECTED for userId={}: {}", user.getId(), fraudReason);
+        } else if (Decision.REVIEW.equals(decision)) {
+            txn.setStatus(TransactionStatus.FLAGGED);
+            fraudReason = "Transaction flagged for manual compliance review. Reason: "
+                    + fraudDecision.getSummary();
+            txn.setFraudReason(fraudReason);
+            log.info("Transaction REVIEW required for userId={}: {}", user.getId(), fraudReason);
         } else {
-            // Step 5 — APPROVED / MONITOR: proceed with balance modification
             if (Decision.MONITOR.equals(decision)) {
                 log.info("Transaction MONITOR tier active for userId={}", user.getId());
             }
@@ -158,22 +140,23 @@ public class TransactionService {
             log.info("Persisted {} risk event(s) for transaction ID={}", events.size(), saved.getId());
         }
 
-        // Step 7 — create a FraudCase if Decision is REVIEW & record CASE_CREATED audit log
-        if (Decision.REVIEW.equals(decision)) {
-            FraudCasePriority priority = FraudCasePriority.fromRiskLevel(fraudDecision.getRiskLevel());
-            FraudCase fraudCase = FraudCase.builder()
-                    .transaction(saved)
-                    .status(FraudCaseStatus.OPEN)
-                    .priority(priority)
-                    .openedAt(LocalDateTime.now())
-                    .build();
+        // Step 7 — create a FraudCase (APPROVED status for clean transactions, OPEN for flagged)
+        FraudCasePriority priority = FraudCasePriority.fromRiskLevel(fraudDecision.getRiskLevel());
+        FraudCaseStatus caseStatus = Decision.APPROVED.equals(decision) ? FraudCaseStatus.APPROVED : FraudCaseStatus.OPEN;
 
-            FraudCase savedCase = fraudCaseRepository.save(fraudCase);
-            fraudCaseAuditService.recordAudit(savedCase, FraudCaseAuditEventType.CASE_CREATED, null, "OPEN", "SYSTEM");
+        FraudCase fraudCase = FraudCase.builder()
+                .transaction(saved)
+                .status(caseStatus)
+                .priority(priority)
+                .openedAt(LocalDateTime.now())
+                .closedAt(Decision.APPROVED.equals(decision) ? LocalDateTime.now() : null)
+                .build();
 
-            log.info("Created FraudCase ID={} with status=OPEN, priority={} for transaction ID={}",
-                    savedCase.getId(), priority, saved.getId());
-        }
+        FraudCase savedCase = fraudCaseRepository.save(fraudCase);
+        fraudCaseAuditService.recordAudit(savedCase, FraudCaseAuditEventType.CASE_CREATED, null, caseStatus.name(), "SYSTEM");
+
+        log.info("Created FraudCase ID={} with status={} priority={} for transaction ID={}",
+                savedCase.getId(), caseStatus, priority, saved.getId());
 
         return toResponse(saved, balanceAfter, fraudReason);
     }
@@ -199,39 +182,19 @@ public class TransactionService {
     @Transactional(readOnly = true)
     public TransactionResponse getTransactionById(Long id) {
         Transaction txn = transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException(id));
+                .orElseThrow(() -> new IllegalArgumentException("Transaction not found with ID: " + id));
         return toResponse(txn, null, null);
     }
 
-    /**
-     * Returns all FLAGGED transactions (admin / fraud dashboard view).
-     */
-    @Transactional(readOnly = true)
-    public List<TransactionResponse> getFlaggedTransactions() {
-        return transactionRepository
-                .findByStatusOrderByCreatedAtDesc(TransactionStatus.FLAGGED)
-                .stream()
-                .map(t -> toResponse(t, null, null))
-                .collect(Collectors.toList());
-    }
-
-    // ------------------------------------------------------------------ //
-    //  Mapper                                                              //
-    // ------------------------------------------------------------------ //
-
-    private TransactionResponse toResponse(Transaction txn,
-                                            BigDecimal newBalance,
-                                            String fraudReason) {
-        boolean approved = TransactionStatus.APPROVED.equals(txn.getStatus());
-
+    private TransactionResponse toResponse(Transaction txn, BigDecimal newBalance, String fraudReason) {
         return TransactionResponse.builder()
                 .id(txn.getId())
                 .userId(txn.getUser().getId())
                 .amount(txn.getAmount())
-                .transactionType(txn.getTransactionType())
+                .transactionType(txn.getTransactionType().name())
                 .status(txn.getStatus())
-                .fraudReason(txn.getFraudReason())
-                .newBalance(approved ? newBalance : null)
+                .fraudReason(fraudReason != null ? fraudReason : txn.getFraudReason())
+                .newBalance(newBalance)
                 .createdAt(txn.getCreatedAt())
                 .build();
     }

@@ -23,7 +23,7 @@ export const CaseSummaryPanel = ({ caseDetail }: CaseSummaryPanelProps) => {
       value: (
         <button
           onClick={() => navigate(`/investigation/${caseDetail.transaction.transactionId}`)}
-          className="font-mono text-[#3B82F6] hover:underline flex items-center gap-1"
+          className="font-mono text-[#E94F37] hover:underline flex items-center gap-1 font-bold"
         >
           #{caseDetail.transaction.transactionId} <ExternalLink className="w-3 h-3" />
         </button>
@@ -31,14 +31,14 @@ export const CaseSummaryPanel = ({ caseDetail }: CaseSummaryPanelProps) => {
     },
     { label: 'Status', value: <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge> },
     { label: 'Priority', value: <Badge variant={priorityConfig.variant}>{priorityConfig.label}</Badge> },
-    { label: 'Assigned Analyst', value: caseDetail.assignedTo || <span className="text-gray-300 italic">Unassigned</span> },
+    { label: 'Assigned Analyst', value: caseDetail.assignedTo || <span className="text-neutral-500 italic">Unassigned</span> },
     { label: 'Opened At', value: formatDate(caseDetail.openedAt) },
-    { label: 'Closed At', value: caseDetail.closedAt ? formatDate(caseDetail.closedAt) : <span className="text-gray-300 italic">Active</span> },
+    { label: 'Closed At', value: caseDetail.closedAt ? formatDate(caseDetail.closedAt) : <span className="text-neutral-500 italic">Active</span> },
     { label: 'User / Customer ID', value: `User #${caseDetail.transaction.userId}` },
-    { label: 'Transaction Amount', value: `₹${caseDetail.transaction.amount?.toLocaleString() ?? 0}` },
+    { label: 'Transaction Amount', value: `$${caseDetail.transaction.amount?.toLocaleString() ?? 0}` },
     { label: 'Risk Score / Tier', value: `${caseDetail.evaluation.riskScore} / 100 (${caseDetail.evaluation.riskLevel})` },
-    { label: 'Resolution Summary', value: caseDetail.resolution || <span className="text-gray-300 italic">Unresolved</span>, fullWidth: true },
-    { label: 'Analyst Review Notes', value: caseDetail.reviewNotes || <span className="text-gray-300 italic">No notes recorded</span>, fullWidth: true },
+    { label: 'Resolution Summary', value: caseDetail.resolution || <span className="text-neutral-500 italic">Unresolved</span>, fullWidth: true },
+    { label: 'Analyst Review Notes', value: caseDetail.reviewNotes || <span className="text-neutral-500 italic">No notes recorded</span>, fullWidth: true },
   ];
 
   return (

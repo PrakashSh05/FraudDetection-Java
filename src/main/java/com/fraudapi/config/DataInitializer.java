@@ -61,7 +61,6 @@ public class DataInitializer implements CommandLineRunner {
 
         List<Transaction> transactionsToSave = new ArrayList<>();
         List<TransactionRiskEvent> riskEventsToSave = new ArrayList<>();
-        List<FraudCase> casesToSave = new ArrayList<>();
 
         for (int i = 1; i <= 50; i++) {
             User user = users.get(random.nextInt(users.size()));
@@ -146,8 +145,18 @@ public class DataInitializer implements CommandLineRunner {
 
             // Create Fraud Case for REVIEW or REJECTED / FLAGGED items
             if ("REVIEW".equals(decision) || "REJECTED".equals(decision)) {
-                FraudCaseStatus caseStatus = (i % 2 == 0) ? FraudCaseStatus.OPEN : FraudCaseStatus.ASSIGNED;
-                String assignedTo = (caseStatus == FraudCaseStatus.ASSIGNED) ? "analyst1" : null;
+                FraudCaseStatus caseStatus;
+                String assignedTo = null;
+
+                if (i % 4 == 0) {
+                    caseStatus = FraudCaseStatus.APPROVED;
+                    assignedTo = "analyst_sarah";
+                } else if (i % 3 == 0) {
+                    caseStatus = FraudCaseStatus.ASSIGNED;
+                    assignedTo = "analyst_john";
+                } else {
+                    caseStatus = FraudCaseStatus.OPEN;
+                }
 
                 FraudCase fc = FraudCase.builder()
                         .transaction(savedTxn)
@@ -162,7 +171,9 @@ public class DataInitializer implements CommandLineRunner {
                 fraudCaseAuditService.recordAudit(savedCase, FraudCaseAuditEventType.CASE_CREATED, null, "OPEN", "SYSTEM");
 
                 if (caseStatus == FraudCaseStatus.ASSIGNED) {
-                    fraudCaseAuditService.recordAudit(savedCase, FraudCaseAuditEventType.CASE_ASSIGNED, null, "analyst1", "SYSTEM");
+                    fraudCaseAuditService.recordAudit(savedCase, FraudCaseAuditEventType.CASE_ASSIGNED, null, "analyst_john", "SYSTEM");
+                } else if (caseStatus == FraudCaseStatus.APPROVED) {
+                    fraudCaseAuditService.recordAudit(savedCase, FraudCaseAuditEventType.CASE_RESOLVED, "OPEN", "APPROVED", "analyst_sarah");
                 }
             }
         }

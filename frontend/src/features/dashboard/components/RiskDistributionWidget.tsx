@@ -2,7 +2,13 @@ import { useRiskDistribution } from '../api/useDashboardData';
 import { DashboardWidget } from '../../../components/ui/DashboardWidget';
 import { SkeletonChart } from './SkeletonLoaders';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { RISK_LEVEL_COLORS } from '../../../lib/chartColors';
+
+const CUSTOM_RISK_COLORS: Record<string, string> = {
+  LOW: '#10B981',
+  MEDIUM: '#F59E0B',
+  HIGH: '#E94F37',
+  CRITICAL: '#F43F5E',
+};
 
 export const RiskDistributionWidget = () => {
   const { data, isLoading, isError, refetch } = useRiskDistribution();
@@ -10,8 +16,7 @@ export const RiskDistributionWidget = () => {
   const chartData = data?.map((item) => ({
     name: item.riskLevel,
     value: item.count,
-    percentage: item.percentage,
-    color: RISK_LEVEL_COLORS[item.riskLevel] || '#6C757D',
+    color: CUSTOM_RISK_COLORS[item.riskLevel] || '#64748B',
   })) || [];
 
   return (
@@ -39,7 +44,7 @@ export const RiskDistributionWidget = () => {
               dataKey="value"
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={entry.color} stroke="#000000" strokeWidth={2} />
               ))}
             </Pie>
             <Tooltip
@@ -47,14 +52,23 @@ export const RiskDistributionWidget = () => {
                 `${value} transactions`,
                 `Risk Tier: ${name}`,
               ]}
-              contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '12px' }}
+              contentStyle={{
+                backgroundColor: '#0A0A0A',
+                borderRadius: '12px',
+                borderColor: '#E94F37',
+                color: '#FFFFFF',
+                fontSize: '12px',
+                boxShadow: '0 10px 25px -5px rgba(233, 79, 55, 0.3)',
+              }}
+              itemStyle={{ color: '#FFFFFF', fontWeight: 'bold' }}
+              labelStyle={{ color: '#FFFFFF', fontWeight: 'bold' }}
             />
             <Legend
               verticalAlign="bottom"
               height={36}
               iconType="circle"
               formatter={(value: string) => (
-                <span className="text-xs font-medium text-[#393E41]">{value}</span>
+                <span className="text-xs font-bold text-white mr-2">{value}</span>
               )}
             />
           </PieChart>

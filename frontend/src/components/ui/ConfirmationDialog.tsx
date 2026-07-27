@@ -54,9 +54,9 @@ export const ConfirmationDialog = ({
   const getIcon = () => {
     switch (variant) {
       case 'danger':
-        return <AlertOctagon className="w-6 h-6 text-[#EF4444]" />;
+        return <AlertOctagon className="w-6 h-6 text-[#E94F37]" />;
       case 'warning':
-        return <AlertTriangle className="w-6 h-6 text-[#F59E0B]" />;
+        return <AlertTriangle className="w-6 h-6 text-amber-400" />;
       case 'primary':
       default:
         return <Info className="w-6 h-6 text-[#E94F37]" />;
@@ -69,23 +69,23 @@ export const ConfirmationDialog = ({
       aria-modal="true"
       aria-labelledby="confirmation-dialog-title"
       aria-describedby="confirmation-dialog-desc"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
     >
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95">
+      <div className="bg-black rounded-2xl shadow-2xl border border-neutral-800 max-w-md w-full p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-50 rounded-full">{getIcon()}</div>
-          <h3 id="confirmation-dialog-title" className="text-base font-bold text-[#393E41]">
+          <div className="p-2 bg-neutral-950 rounded-xl border border-neutral-800">{getIcon()}</div>
+          <h3 id="confirmation-dialog-title" className="text-base font-bold text-white">
             {title}
           </h3>
         </div>
 
-        <p id="confirmation-dialog-desc" className="text-xs text-gray-600">
+        <p id="confirmation-dialog-desc" className="text-xs text-neutral-400 leading-relaxed">
           {description}
         </p>
 
         {children}
 
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-800">
           <Button variant="outline" size="sm" onClick={onClose} disabled={isLoading}>
             {cancelText}
           </Button>

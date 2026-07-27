@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Card } from './Card';
 import { Button } from './Button';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Inbox } from 'lucide-react';
 
 interface DashboardWidgetProps {
   title: string;
@@ -25,7 +25,7 @@ export const DashboardWidget = ({
   isError,
   isEmpty = false,
   errorMessage = 'Failed to load widget data',
-  emptyMessage = 'No data available',
+  emptyMessage = 'No telemetry data available',
   onRetry,
   skeleton,
   children,
@@ -34,8 +34,8 @@ export const DashboardWidget = ({
     if (skeleton) return <>{skeleton}</>;
     return (
       <Card title={title} subtitle={subtitle}>
-        <div className="h-64 flex items-center justify-center animate-pulse bg-gray-50 rounded-lg">
-          <div className="h-6 w-32 bg-gray-200 rounded"></div>
+        <div className="h-64 flex items-center justify-center animate-pulse bg-slate-950/60 rounded-xl border border-slate-800">
+          <div className="h-6 w-32 bg-slate-800 rounded"></div>
         </div>
       </Card>
     );
@@ -44,13 +44,13 @@ export const DashboardWidget = ({
   if (isError) {
     return (
       <Card title={title} subtitle={subtitle}>
-        <div className="h-64 flex flex-col items-center justify-center p-6 text-center bg-rose-50/50 rounded-lg border border-rose-100">
-          <AlertCircle className="w-8 h-8 text-[#EF4444] mb-2" />
-          <p className="text-xs font-semibold text-[#EF4444]">{errorMessage}</p>
+        <div className="h-64 flex flex-col items-center justify-center p-6 text-center bg-rose-500/10 rounded-xl border border-rose-500/20">
+          <AlertCircle className="w-8 h-8 text-rose-400 mb-2" />
+          <p className="text-xs font-semibold text-rose-300">{errorMessage}</p>
           {onRetry && (
             <div className="mt-3">
               <Button size="sm" variant="outline" onClick={onRetry}>
-                Retry
+                Retry Connection
               </Button>
             </div>
           )}
@@ -62,8 +62,9 @@ export const DashboardWidget = ({
   if (isEmpty) {
     return (
       <Card title={title} subtitle={subtitle}>
-        <div className="h-64 flex items-center justify-center text-xs text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-          {emptyMessage}
+        <div className="h-64 flex flex-col items-center justify-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-dashed border-slate-800/80 gap-2">
+          <Inbox className="w-6 h-6 text-slate-600" />
+          <span>{emptyMessage}</span>
         </div>
       </Card>
     );

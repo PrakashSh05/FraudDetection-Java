@@ -12,10 +12,10 @@ export const RiskAssessmentCard = ({ evaluation }: RiskAssessmentCardProps) => {
   return (
     <Card title="Risk Scoring Assessment" subtitle="Automated Strategy Pattern rule engine telemetry">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-        <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-between">
+        <div className="p-3.5 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center justify-between">
           <div>
-            <span className="text-gray-400 block text-[10px] uppercase font-semibold">Total Risk Score</span>
-            <span className="text-xl font-bold text-[#E94F37] flex items-center gap-1.5 mt-0.5">
+            <span className="text-neutral-400 block text-[10px] uppercase font-bold">Total Risk Score</span>
+            <span className="text-xl font-extrabold text-[#E94F37] flex items-center gap-1.5 mt-0.5">
               <Gauge className="w-5 h-5" /> {evaluation.riskScore} / 100
             </span>
           </div>
@@ -24,29 +24,29 @@ export const RiskAssessmentCard = ({ evaluation }: RiskAssessmentCardProps) => {
           </Badge>
         </div>
 
-        <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-between">
+        <div className="p-3.5 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center justify-between">
           <div>
-            <span className="text-gray-400 block text-[10px] uppercase font-semibold">Risk Level Tier</span>
-            <span className="text-sm font-bold text-[#393E41] mt-0.5 block">{evaluation.riskLevel}</span>
+            <span className="text-neutral-400 block text-[10px] uppercase font-bold">Risk Level Tier</span>
+            <span className="text-sm font-bold text-white mt-0.5 block">{evaluation.riskLevel}</span>
           </div>
           <Badge variant={PRIORITY_BADGE_VARIANTS[evaluation.riskLevel] || 'neutral'}>
             {evaluation.riskLevel}
           </Badge>
         </div>
 
-        <div className="p-3 bg-gray-50 rounded-lg flex items-center gap-2">
-          <Clock className="w-4 h-4 text-indigo-500" />
+        <div className="p-3.5 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center gap-2.5">
+          <Clock className="w-4 h-4 text-orange-400" />
           <div>
-            <span className="text-gray-400 block text-[10px] uppercase font-semibold">Evaluation Latency</span>
-            <span className="font-semibold text-[#393E41]">{evaluation.processingTimeMs} ms</span>
+            <span className="text-neutral-400 block text-[10px] uppercase font-bold">Evaluation Latency</span>
+            <span className="font-bold text-emerald-400">{evaluation.processingTimeMs} ms</span>
           </div>
         </div>
 
-        <div className="p-3 bg-gray-50 rounded-lg flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+        <div className="p-3.5 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center gap-2.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <div>
-            <span className="text-gray-400 block text-[10px] uppercase font-semibold">Evaluated Timestamp</span>
-            <span className="font-semibold text-[#393E41]">
+            <span className="text-neutral-400 block text-[10px] uppercase font-bold">Timestamp</span>
+            <span className="font-bold text-neutral-200">
               {new Date(evaluation.evaluationTimestamp).toLocaleTimeString()}
             </span>
           </div>

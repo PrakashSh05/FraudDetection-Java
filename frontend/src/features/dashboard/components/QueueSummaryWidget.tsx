@@ -32,17 +32,17 @@ export const QueueSummaryWidget = () => {
         {items.map((item) => (
           <div
             key={item.label}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+            className="flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-slate-800"
           >
-            <span className="text-xs font-medium text-[#393E41]">{item.label}</span>
+            <span className="text-xs font-bold text-slate-300">{item.label}</span>
             <Badge variant={item.variant}>{item.count.toLocaleString()}</Badge>
           </div>
         ))}
       </div>
 
-      <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
         <span>Total Tracked Cases:</span>
-        <span className="font-bold text-[#393E41]">{data?.totalCases?.toLocaleString() ?? 0}</span>
+        <span className="font-extrabold text-white">{data?.totalCases?.toLocaleString() ?? 0}</span>
       </div>
     </DashboardWidget>
   );
