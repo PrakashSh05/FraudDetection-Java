@@ -45,7 +45,7 @@ sequenceDiagram
 
     Client->>TxnService: POST /api/transactions
     TxnService->>RiskService: evaluateTransactionRisk(context)
-    RiskService->>RuleEngine: evaluate(context) [HighAmountRule, VelocityRule]
+    RiskService->>RuleEngine: evaluate(context) [HighAmountRule, VelocityRule, RoundAmountRule, RepeatedAmountRule]
     RuleEngine-->>RiskService: List<TriggeredRule>
     RiskService->>DecisionEngine: evaluateDecision(totalScore, rules, latency)
     DecisionEngine-->>RiskService: FraudDecision (score capped at 100)

@@ -54,9 +54,10 @@ flowchart TB
         DecisionEngine["DecisionEngine Component"]
         
         subgraph RuleEngine ["Strategy Pattern Rule Engine"]
-            HighAmountRule["HighAmountRule (+35 pts)"]
-            VelocityRule["VelocityRule (+25 pts)"]
-            PatternRule["SuspiciousPatternRule (+25 pts)"]
+            HighAmountRule["HighAmountRule (+45 pts, DEBIT only)"]
+            VelocityRule["VelocityRule (+30 pts)"]
+            RoundAmountRule["RoundAmountRule (+20 pts)"]
+            RepeatedAmountRule["RepeatedAmountRule (+25 pts)"]
         end
     end
 
@@ -103,8 +104,13 @@ classDiagram
         +evaluate(context) Optional~TriggeredRule~
     }
 
-    class SuspiciousPatternRule {
+    class RoundAmountRule {
         +RULE_ID: "RULE-003"
+        +evaluate(context) Optional~TriggeredRule~
+    }
+
+    class RepeatedAmountRule {
+        +RULE_ID: "RULE-004"
         +evaluate(context) Optional~TriggeredRule~
     }
 
@@ -120,7 +126,8 @@ classDiagram
 
     FraudRule <|.. HighAmountRule
     FraudRule <|.. VelocityRule
-    FraudRule <|.. SuspiciousPatternRule
+    FraudRule <|.. RoundAmountRule
+    FraudRule <|.. RepeatedAmountRule
     TransactionRiskService --> FraudRule : Spring Auto-wires List<FraudRule>
     TransactionRiskService --> DecisionEngine : delegates risk level mapping
 ```
@@ -182,9 +189,10 @@ The risk engine accumulates points from triggered rules and applies numerical ca
 
 | Rule ID | Name | Category | Points | Default Threshold | Description |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| `RULE-001` | `HIGH_AMOUNT` | `TRANSACTION` | `+35` | `$50,000.00` | Fires when single transaction amount exceeds threshold |
-| `RULE-002` | `VELOCITY_EXCEEDED` | `VELOCITY` | `+25` | `3 txns / 5 mins` | Fires when user transaction velocity exceeds threshold |
-| `RULE-003` | `SUSPICIOUS_PATTERN` | `PATTERN` | `+25` | Debit burst | Fires on rapid consecutive debit transaction bursts |
+| `RULE-001` | `HIGH_AMOUNT` | `TRANSACTION` | `+45` | `$50,000.00` | Fires when single DEBIT amount exceeds threshold (CREDITs skipped) |
+| `RULE-002` | `VELOCITY_EXCEEDED` | `VELOCITY` | `+30` | `3 txns / 5 mins` | Fires when user transaction velocity exceeds window limit |
+| `RULE-003` | `ROUND_AMOUNT` | `PATTERN` | `+20` | `$10,000.00` (divisible by 1000) | Fires on suspiciously round transaction amounts (structuring signal) |
+| `RULE-004` | `REPEATED_AMOUNT` | `PATTERN` | `+25` | `2 identical txns / 5 mins` | Fires when identical transaction amounts repeat in short window |
 
 ---
 

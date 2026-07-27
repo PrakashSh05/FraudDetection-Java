@@ -84,25 +84,28 @@ class TransactionControllerIntegrationTest {
 
     @Test
     @Order(3)
-    @DisplayName("3. ₹75,000 DEBIT → APPROVED by MONITOR decision (35 pts = MEDIUM tier)")
+    @DisplayName("3. ₹75,000 DEBIT → FLAGGED by HighAmount (45pts) + RoundAmount (20pts) = 65pts (HIGH risk)")
     void highAmountDebit_ShouldBeFlagged() throws Exception {
         TransactionRequest req = buildTxnRequest(createdUserId, "75000.00", "DEBIT");
 
         mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.status").value("APPROVED"))
-                .andExpect(jsonPath("$.data.newBalance").value(20000.00));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("FLAGGED"))
+                .andExpect(jsonPath("$.data.fraudReason").value(containsString("indicator")))
+                .andExpect(jsonPath("$.data.newBalance").doesNotExist());
     }
 
     @Test
     @Order(4)
-    @DisplayName("4. GET /api/fraud/flagged → returns empty or successful list")
+    @DisplayName("4. GET /api/fraud/flagged → lists the high-amount transaction")
     void getFlaggedTransactions_ShouldReturnFlaggedList() throws Exception {
         mockMvc.perform(get("/api/fraud/flagged"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"));
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.data[0].status").value("FLAGGED"));
     }
 
     @Test
