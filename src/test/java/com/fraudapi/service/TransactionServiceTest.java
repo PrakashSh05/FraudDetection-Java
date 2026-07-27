@@ -77,7 +77,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("1. APPROVED DEBIT transaction should deduct user balance and save case")
+    @DisplayName("1. APPROVED DEBIT transaction should deduct user balance and create APPROVED case")
     void testApprovedDebitTransaction_ShouldDeductBalance() {
         TransactionRequest request = buildRequest(1L, "5000.00", TransactionType.DEBIT);
 
@@ -99,11 +99,12 @@ class TransactionServiceTest {
 
         verify(userRepository).save(argThat(u -> u.getBalance().compareTo(new BigDecimal("95000.00")) == 0));
         verify(transactionRiskEventRepository, never()).saveAll(any());
+        // Clean transactions create an APPROVED FraudCase
         verify(fraudCaseRepository).save(argThat(fc -> fc.getStatus() == FraudCaseStatus.APPROVED));
     }
 
     @Test
-    @DisplayName("2. Transaction exceeding threshold should be FLAGGED and risk events saved")
+    @DisplayName("2. Transaction exceeding threshold should be FLAGGED and risk events saved and OPEN case created")
     void testHighAmountTransaction_ShouldBeFlagged() {
         TransactionRequest request = buildRequest(1L, "75000.00", TransactionType.DEBIT);
 
@@ -141,6 +142,7 @@ class TransactionServiceTest {
         assertTrue(response.getFraudReason().contains("exceeded"));
         assertNull(response.getNewBalance());
         verify(transactionRiskEventRepository).saveAll(argThat(list -> ((List<?>) list).size() == 1));
+        // Flagged transactions create an OPEN FraudCase
         verify(fraudCaseRepository).save(argThat(fc -> fc.getStatus() == FraudCaseStatus.OPEN));
     }
 
@@ -188,7 +190,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("4. DEBIT exceeding user balance should throw InsufficientBalanceException")
+    @DisplayName("4. DEBIT exceeding user balance should throw InsufficientBalanceException before any DB save")
     void testInsufficientBalance_ShouldThrowException() {
         TransactionRequest request = buildRequest(1L, "150000.00", TransactionType.DEBIT);
 

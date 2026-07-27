@@ -38,7 +38,7 @@ class AnalyticsControllerIntegrationTest {
         mockMvc.perform(get("/api/analytics/overview")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data.totalTransactions").value(100))
                 .andExpect(jsonPath("$.data.approvedTransactions").value(85));
     }
@@ -52,7 +52,7 @@ class AnalyticsControllerIntegrationTest {
         mockMvc.perform(get("/api/analytics/risk-distribution")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data[0].riskLevel").value("LOW"));
     }
 
@@ -65,7 +65,7 @@ class AnalyticsControllerIntegrationTest {
         mockMvc.perform(get("/api/analytics/top-rules")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data[0].ruleId").value("RULE-001"));
     }
 }
