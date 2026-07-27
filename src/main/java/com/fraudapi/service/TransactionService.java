@@ -80,7 +80,7 @@ public class TransactionService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        BigDecimal balanceAfter = user.getBalance();
+        BigDecimal balanceAfter = null;
         String fraudReason = null;
 
         // Step 5 — process decision branches
