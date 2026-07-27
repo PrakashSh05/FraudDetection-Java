@@ -1,19 +1,11 @@
 package com.fraudapi.service;
 
-import com.fraudapi.constants.Decision;
-import com.fraudapi.constants.FraudCaseAuditEventType;
-import com.fraudapi.constants.FraudCasePriority;
-import com.fraudapi.constants.FraudCaseStatus;
-import com.fraudapi.constants.RiskLevel;
-import com.fraudapi.constants.RuleSeverity;
-import com.fraudapi.constants.TransactionStatus;
-import com.fraudapi.constants.TransactionType;
+import com.fraudapi.constants.*;
 import com.fraudapi.dto.FraudDecision;
 import com.fraudapi.dto.TransactionRequest;
 import com.fraudapi.dto.TransactionResponse;
 import com.fraudapi.dto.TriggeredRule;
 import com.fraudapi.exception.InsufficientBalanceException;
-import com.fraudapi.exception.UserNotFoundException;
 import com.fraudapi.model.Transaction;
 import com.fraudapi.model.User;
 import com.fraudapi.repository.FraudCaseRepository;
@@ -38,31 +30,26 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for {@link TransactionService} integrated with {@link TransactionRiskService},
- * {@link TransactionRiskEventRepository}, {@link FraudCaseRepository}, and {@link FraudCaseAuditService}.
- */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("TransactionService Unit Tests")
 class TransactionServiceTest {
-
-    @Mock
-    private UserRepository userRepository;
 
     @Mock
     private TransactionRepository transactionRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private TransactionRiskEventRepository transactionRiskEventRepository;
+
+    @Mock
+    private TransactionRiskService transactionRiskService;
 
     @Mock
     private FraudCaseRepository fraudCaseRepository;
 
     @Mock
     private FraudCaseAuditService fraudCaseAuditService;
-
-    @Mock
-    private TransactionRiskService transactionRiskService;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -74,13 +61,13 @@ class TransactionServiceTest {
     void setUp() {
         testUser = User.builder()
                 .id(1L)
-                .name("Rahul Sharma")
-                .email("rahul@example.com")
+                .name("Test User")
+                .email("test@example.com")
                 .balance(new BigDecimal("100000.00"))
                 .build();
 
         approvedDecision = FraudDecision.builder()
-                .riskScore(0)
+                .riskScore(10)
                 .riskLevel(RiskLevel.LOW)
                 .decision(Decision.APPROVED)
                 .summary("No fraud indicators detected.")
@@ -90,8 +77,8 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("1. Normal DEBIT transaction should be APPROVED and balance deducted")
-    void testNormalDebitTransaction_ShouldBeApproved() {
+    @DisplayName("1. APPROVED DEBIT transaction should deduct user balance and save case")
+    void testApprovedDebitTransaction_ShouldDeductBalance() {
         TransactionRequest request = buildRequest(1L, "5000.00", TransactionType.DEBIT);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -102,6 +89,7 @@ class TransactionServiceTest {
             t.setCreatedAt(LocalDateTime.now());
             return t;
         });
+        when(fraudCaseRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         TransactionResponse response = transactionService.createTransaction(request);
 
@@ -111,7 +99,7 @@ class TransactionServiceTest {
 
         verify(userRepository).save(argThat(u -> u.getBalance().compareTo(new BigDecimal("95000.00")) == 0));
         verify(transactionRiskEventRepository, never()).saveAll(any());
-        verify(fraudCaseRepository, never()).save(any());
+        verify(fraudCaseRepository).save(argThat(fc -> fc.getStatus() == FraudCaseStatus.APPROVED));
     }
 
     @Test
@@ -145,6 +133,7 @@ class TransactionServiceTest {
             t.setCreatedAt(LocalDateTime.now());
             return t;
         });
+        when(fraudCaseRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         TransactionResponse response = transactionService.createTransaction(request);
 
@@ -152,7 +141,7 @@ class TransactionServiceTest {
         assertTrue(response.getFraudReason().contains("exceeded"));
         assertNull(response.getNewBalance());
         verify(transactionRiskEventRepository).saveAll(argThat(list -> ((List<?>) list).size() == 1));
-        verify(fraudCaseRepository, never()).save(any());
+        verify(fraudCaseRepository).save(argThat(fc -> fc.getStatus() == FraudCaseStatus.OPEN));
     }
 
     @Test

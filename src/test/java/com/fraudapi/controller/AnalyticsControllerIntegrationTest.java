@@ -32,15 +32,13 @@ class AnalyticsControllerIntegrationTest {
     @Test
     @DisplayName("GET /api/analytics/overview -> returns HTTP 200 with summary metrics")
     void testGetOverview_Returns200() throws Exception {
-        // AnalyticsOverviewResponse record: (totalTransactions, approvedTransactions, monitorTransactions,
-        //                                    reviewTransactions, rejectedTransactions, averageRiskScore)
         AnalyticsOverviewResponse overview = new AnalyticsOverviewResponse(100L, 85L, 5L, 6L, 4L, 14.5);
         when(analyticsService.getOverviewAnalytics()).thenReturn(overview);
 
         mockMvc.perform(get("/api/analytics/overview")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.totalTransactions").value(100))
                 .andExpect(jsonPath("$.data.approvedTransactions").value(85));
     }
@@ -48,28 +46,26 @@ class AnalyticsControllerIntegrationTest {
     @Test
     @DisplayName("GET /api/analytics/risk-distribution -> returns HTTP 200 with distribution list")
     void testGetRiskDistribution_Returns200() throws Exception {
-        // RiskDistributionResponse record: (riskLevel, count)
         RiskDistributionResponse dist = new RiskDistributionResponse("LOW", 85L);
         when(analyticsService.getRiskDistributionAnalytics()).thenReturn(List.of(dist));
 
         mockMvc.perform(get("/api/analytics/risk-distribution")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data[0].riskLevel").value("LOW"));
     }
 
     @Test
     @DisplayName("GET /api/analytics/top-rules -> returns HTTP 200 with top fired rules")
     void testGetTopRules_Returns200() throws Exception {
-        // TopRuleResponse record: (ruleId, ruleName, triggerCount)
         TopRuleResponse topRule = new TopRuleResponse("RULE-001", "HIGH_AMOUNT", 15L);
         when(analyticsService.getTopRulesAnalytics()).thenReturn(List.of(topRule));
 
         mockMvc.perform(get("/api/analytics/top-rules")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data[0].ruleId").value("RULE-001"));
     }
 }

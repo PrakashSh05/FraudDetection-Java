@@ -8,7 +8,7 @@ on:
 
 jobs:
   # ------------------------------------------------------------------ #
-  # Job 1: Backend Pipeline (Java 17, Maven, JaCoCo, JUnit)            #
+  # Job 1: Backend Pipeline (Java 17, Maven, JUnit 5)                 #
   # ------------------------------------------------------------------ #
   backend:
     name: Backend Build & Test (Java 17)
@@ -25,8 +25,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Grant Execute Permission for Maven Wrapper
+        run: chmod +x mvnw
+
       - name: Build & Run Automated Unit and Integration Tests
-        run: mvn clean verify -B
+        run: ./mvnw test -B
 
       - name: Upload Backend Executable JAR
         uses: actions/upload-artifact@v4

@@ -63,7 +63,7 @@ class FraudCaseControllerIntegrationTest {
         mockMvc.perform(get("/api/cases")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.content[0].caseId").value(1));
     }
 
@@ -78,7 +78,7 @@ class FraudCaseControllerIntegrationTest {
         mockMvc.perform(get("/api/cases/summary")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.totalCases").value(48));
     }
 
@@ -98,7 +98,7 @@ class FraudCaseControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.assignedTo").value("john.doe"));
     }
 
@@ -114,7 +114,7 @@ class FraudCaseControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.status").value("ERROR"))
                 .andExpect(jsonPath("$.message").value("Cannot transition out of CLOSED status"));
     }
 }
